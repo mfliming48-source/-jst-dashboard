@@ -142,6 +142,9 @@
     .btn-danger:hover{background:var(--red-light);border-color:transparent}
     .btn-edit{background:transparent;color:var(--blue-text);border-color:transparent;padding:7px 10px}
     .btn-edit:hover{background:var(--blue-light);border-color:transparent}
+    body.modo-leitor .btn-edit,
+    body.modo-leitor .btn-danger.btn-icon{display:none}
+    body.modo-leitor .btn-importar-json{display:none}
     .btn-sm{padding:6px 12px;font-size:12px}
     .btn-icon{padding:7px;border-radius:var(--radius-sm)}
     label.btn{cursor:pointer}
@@ -366,7 +369,8 @@
     getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc
+    getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
+    collection, onSnapshot, getDocs, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -383,7 +387,11 @@
   const db = getFirestore(app);
 
   // Expõe ao script principal (fora do module) através de window.FB
-  window.FB = { auth, db, doc, getDoc, setDoc, signInWithEmailAndPassword, signOut };
+  window.FB = {
+    auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc,
+    collection, onSnapshot, getDocs, serverTimestamp,
+    signInWithEmailAndPassword, signOut
+  };
 
   const loginForm = document.getElementById('loginForm');
   const loginErro = document.getElementById('loginErro');
@@ -424,11 +432,27 @@
     btnLogout.addEventListener('click', () => signOut(auth));
   }
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       loginOverlay.style.display = 'none';
       appShell.style.display = '';
-      window.dispatchEvent(new CustomEvent('fbready', { detail: { uid: user.uid, email: user.email } }));
+
+      // Procura o perfil do utilizador (admin ou utilizador normal).
+      // Se ainda não existir um perfil, cria um como 'user' (privilégio mínimo por defeito).
+      let papel = 'user';
+      try {
+        const perfilRef = doc(db, 'perfis', user.uid);
+        const perfilSnap = await getDoc(perfilRef);
+        if (perfilSnap.exists()) {
+          papel = perfilSnap.data().role === 'admin' ? 'admin' : 'user';
+        } else {
+          await setDoc(perfilRef, { email: user.email, role: 'user', criadoEm: serverTimestamp() });
+        }
+      } catch (e) {
+        console.error('Não foi possível obter o perfil do utilizador:', e);
+      }
+
+      window.dispatchEvent(new CustomEvent('fbready', { detail: { uid: user.uid, email: user.email, papel } }));
     } else {
       loginOverlay.style.display = 'flex';
       appShell.style.display = 'none';
@@ -478,6 +502,7 @@
       <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span class="hide-mobile">Nova Tarefa</span><span style="display:none" class="show-mobile">Nova</span>
     </button>
+    <span id="badgeUtilizador" class="hide-mobile" style="font-size:12px; color:var(--text-muted); padding:0 6px; white-space:nowrap;"></span>
     <button class="btn btn-icon" id="btnLogout" title="Sair" aria-label="Sair">
       <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </button>
@@ -503,7 +528,7 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span class="hide-mobile">Exportar JSON</span><span class="show-mobile" style="display:none">JSON</span>
         </button>
-        <label class="btn btn-success">
+        <label class="btn btn-success btn-importar-json">
           <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           Importar
           <input type="file" id="importFile" accept="application/json" style="display:none">
@@ -834,25 +859,40 @@ let tabTecnico = 'mensal';
 const COLORS = ['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0d9488','#db2777','#ea580c','#65a30d','#0284c7'];
 
 // ============================================================
-// PERSISTENCE (Firebase Firestore)
-// Os dados sao gravados na conta Firebase associada ao login,
-// o que permite aceder ao dashboard a partir de qualquer
-// dispositivo/navegador. Mantemos tambem uma copia em
-// localStorage como cache para abertura instantanea.
-// Compatibilidade com o app desktop (pywebview) e mantida.
+// PERSISTENCE (Firebase Firestore — coleção partilhada)
+// Todas as contas autenticadas partilham a mesma coleção de
+// tarefas ('tarefas'), sincronizada em tempo real: o que um
+// utilizador cria aparece automaticamente para os outros.
+// Qualquer utilizador autenticado pode CRIAR tarefas.
+// Apenas quem tem perfil 'admin' pode EDITAR ou APAGAR
+// (reforçado tanto na interface como nas regras do Firestore).
+// Mantemos uma copia em localStorage como cache para abertura
+// instantanea, e compatibilidade com o app desktop (pywebview).
 // ============================================================
 let uidAtual = null;
+let emailAtual = null;
+let souAdmin = false;
+let unsubscribeTarefas = null;
 
-function docTarefasRef() {
-  if (!(window.FB && uidAtual)) return null;
-  return window.FB.doc(window.FB.db, 'usuarios', uidAtual, 'dashboard', 'tarefas');
+function colecaoTarefasRef() {
+  if (!window.FB) return null;
+  return window.FB.collection(window.FB.db, 'tarefas');
+}
+
+function aplicarPermissoesUI() {
+  document.body.classList.toggle('modo-leitor', !souAdmin);
+  const badge = document.getElementById('badgeUtilizador');
+  if (badge) {
+    badge.textContent = emailAtual ? `${emailAtual} · ${souAdmin ? 'Admin' : 'Utilizador'}` : '';
+  }
 }
 
 async function guardarLocal() {
+  // Mantido por compatibilidade (cache local + app desktop).
+  // A gravação "de verdade" na nuvem é feita por tarefa em
+  // guardarTarefa()/removerTarefa() (ver mais abaixo).
   const json = JSON.stringify(tarefas);
   localStorage.setItem('jst_tarefas_v2', json);
-
-  // Compatibilidade com o executavel desktop (pywebview)
   if (window.pywebview && window.pywebview.api && window.pywebview.api.guardar_dados) {
     try {
       await window.pywebview.api.guardar_dados(json);
@@ -860,23 +900,6 @@ async function guardarLocal() {
       console.error('Falha ao guardar dados/backup local:', e);
     }
   }
-
-  // Gravar no Firestore (fonte principal quando acedido pela net)
-  const ref = docTarefasRef();
-  if (ref) {
-    try {
-      await window.FB.setDoc(ref, {
-        tarefas: tarefas,
-        atualizadoEm: new Date().toISOString()
-      });
-      return { ok: true, firestore: true };
-    } catch (e) {
-      console.error('Falha ao guardar no Firestore:', e);
-      toast('Não foi possível sincronizar com a nuvem.', 'error');
-      throw e;
-    }
-  }
-  return { ok: true, localStorage: true };
 }
 
 async function carregarDoFicheiro() {
@@ -885,7 +908,7 @@ async function carregarDoFicheiro() {
     const raw = await window.pywebview.api.carregar_dados();
     if (raw) {
       const dados = JSON.parse(raw);
-      if (Array.isArray(dados)) {
+      if (Array.isArray(dados) && tarefas.length === 0) {
         tarefas = dados;
         renderizar();
       }
@@ -895,28 +918,64 @@ async function carregarDoFicheiro() {
   }
 }
 
-async function carregarDoFirestore() {
-  const ref = docTarefasRef();
-  if (!ref) return;
+async function migrarDadosAntigosSeNecessario() {
+  // Migração única: se existirem dados no formato antigo
+  // (1 documento por utilizador) e a coleção partilhada ainda
+  // estiver vazia, copia essas tarefas para a coleção partilhada.
   try {
-    const snap = await window.FB.getDoc(ref);
-    if (snap.exists()) {
-      const dados = snap.data();
-      if (Array.isArray(dados.tarefas)) {
-        tarefas = dados.tarefas;
-        localStorage.setItem('jst_tarefas_v2', JSON.stringify(tarefas));
-        renderizar();
-      }
+    const colRef = colecaoTarefasRef();
+    const snapAtual = await window.FB.getDocs(colRef);
+    if (!snapAtual.empty) return; // já há dados partilhados, não migrar
+
+    const antigoRef = window.FB.doc(window.FB.db, 'usuarios', uidAtual, 'dashboard', 'tarefas');
+    const antigoSnap = await window.FB.getDoc(antigoRef);
+    if (!antigoSnap.exists()) return;
+    const dados = antigoSnap.data();
+    if (!Array.isArray(dados.tarefas) || dados.tarefas.length === 0) return;
+
+    for (const t of dados.tarefas) {
+      const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+      const novoRef = window.FB.doc(window.FB.db, 'tarefas', id);
+      await window.FB.setDoc(novoRef, {
+        ...t, id, criadoPor: uidAtual, criadoPorEmail: emailAtual,
+        criadoEm: window.FB.serverTimestamp()
+      });
     }
+    toast('Dados antigos migrados para a coleção partilhada.', 'success');
   } catch (e) {
-    console.error('Nao foi possivel carregar dados do Firestore:', e);
-    toast('Não foi possível carregar os dados da nuvem.', 'error');
+    console.warn('Migração de dados antigos não realizada:', e);
   }
 }
 
-window.addEventListener('fbready', function(e){
+function escutarTarefasEmTempoReal() {
+  const colRef = colecaoTarefasRef();
+  if (!colRef) return;
+  if (unsubscribeTarefas) unsubscribeTarefas();
+  unsubscribeTarefas = window.FB.onSnapshot(colRef, (snap) => {
+    const lista = [];
+    snap.forEach(docSnap => lista.push({ ...docSnap.data(), id: docSnap.id }));
+    // Mais recentes primeiro (por data de criação, quando disponível)
+    lista.sort((a, b) => {
+      const ta = a.criadoEm && a.criadoEm.toMillis ? a.criadoEm.toMillis() : 0;
+      const tb = b.criadoEm && b.criadoEm.toMillis ? b.criadoEm.toMillis() : 0;
+      return tb - ta;
+    });
+    tarefas = lista;
+    localStorage.setItem('jst_tarefas_v2', JSON.stringify(tarefas));
+    renderizar();
+  }, (e) => {
+    console.error('Falha na sincronização em tempo real:', e);
+    toast('Não foi possível sincronizar com a nuvem.', 'error');
+  });
+}
+
+window.addEventListener('fbready', async function(e){
   uidAtual = e.detail.uid;
-  carregarDoFirestore();
+  emailAtual = e.detail.email;
+  souAdmin = e.detail.papel === 'admin';
+  aplicarPermissoesUI();
+  await migrarDadosAntigosSeNecessario();
+  escutarTarefasEmTempoReal();
 });
 
 window.addEventListener('pywebviewready', function(){
@@ -1474,6 +1533,7 @@ function abrirModalNova(){
   abrirModal('modalOverlay');
 }
 function editarTarefa(idx){
+  if(!souAdmin){ toast('Apenas o administrador pode editar tarefas.','error'); return; }
   editando=true;
   const t=tarefas[idx];
   document.getElementById('editIndex').value=idx;
@@ -1513,9 +1573,9 @@ function validar(){
 }
 function limparErros(){ ['grp-tecnico','grp-tarefa','grp-data'].forEach(id=>document.getElementById(id)?.classList.remove('has-error')); }
 
-function guardarTarefa(){
+async function guardarTarefa(){
   if(!validar()){ toast('Preencha os campos obrigatórios.','error'); return; }
-  const tarefa={
+  const dadosForm={
     tecnico:document.getElementById('tecnico').value.trim(),
     tarefa:document.getElementById('tarefa').value.trim(),
     data:document.getElementById('data').value,
@@ -1528,12 +1588,38 @@ function guardarTarefa(){
     observacoes:document.getElementById('observacoes').value.trim()
   };
   const idx=parseInt(document.getElementById('editIndex').value);
-  if(idx>=0){ tarefas[idx]=tarefa; toast('Tarefa atualizada.','success'); }
-  else { tarefas.unshift(tarefa); toast('Tarefa adicionada.','success'); }
-  guardarLocal();
-  fecharModal();
-  pagina=1;
-  renderizar();
+
+  if(!window.FB || !uidAtual){ toast('Sem ligação à nuvem — tenta novamente.','error'); return; }
+
+  try{
+    if(idx>=0){
+      if(!souAdmin){ toast('Apenas o administrador pode editar tarefas.','error'); return; }
+      const t=tarefas[idx];
+      if(!t || !t.id){ toast('Tarefa não encontrada.','error'); return; }
+      await window.FB.updateDoc(window.FB.doc(window.FB.db,'tarefas',t.id), {
+        ...dadosForm,
+        atualizadoEm: window.FB.serverTimestamp(),
+        atualizadoPor: emailAtual
+      });
+      toast('Tarefa atualizada.','success');
+    } else {
+      const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(16).slice(2));
+      await window.FB.setDoc(window.FB.doc(window.FB.db,'tarefas',id), {
+        ...dadosForm,
+        id,
+        criadoPor: uidAtual,
+        criadoPorEmail: emailAtual,
+        criadoEm: window.FB.serverTimestamp()
+      });
+      toast('Tarefa adicionada.','success');
+    }
+    guardarLocal();
+    fecharModal();
+    pagina=1;
+  } catch(e){
+    console.error('Erro ao guardar tarefa:', e);
+    toast('Não foi possível guardar a tarefa na nuvem.','error');
+  }
 }
 
 function limparFormulario(){
@@ -1566,11 +1652,18 @@ function verDetalhe(idx){
 // ============================================================
 // REMOVE
 // ============================================================
-function removerTarefa(idx){
+async function removerTarefa(idx){
+  if(!souAdmin){ toast('Apenas o administrador pode remover tarefas.','error'); return; }
   if(!confirm('Remover esta tarefa?')) return;
-  tarefas.splice(idx,1);
-  guardarLocal(); renderizar();
-  toast('Tarefa removida.','info');
+  const t=tarefas[idx];
+  if(!t || !t.id){ toast('Tarefa não encontrada.','error'); return; }
+  try{
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db,'tarefas',t.id));
+    toast('Tarefa removida.','info');
+  } catch(e){
+    console.error('Erro ao remover tarefa:', e);
+    toast('Não foi possível remover a tarefa.','error');
+  }
 }
 
 // ============================================================
@@ -1708,18 +1801,27 @@ function exportarJSON(){
   URL.revokeObjectURL(url);
   toast('Ficheiro JSON exportado.','success');
 }
-document.getElementById('importFile').addEventListener('change',function(e){
+document.getElementById('importFile').addEventListener('change',async function(e){
   const file=e.target.files[0]; if(!file) return;
+  if(!souAdmin){ toast('Apenas o administrador pode importar tarefas.','error'); e.target.value=''; return; }
   const reader=new FileReader();
-  reader.onload=function(ev){
+  reader.onload=async function(ev){
     try{
       const dados=JSON.parse(ev.target.result);
       if(Array.isArray(dados)){
-        tarefas=dados;
-        guardarLocal(); pagina=1; renderizar();
-        toast(`Importado com sucesso (${dados.length} tarefas).`,'success');
+        if(!confirm(`Importar ${dados.length} tarefa(s) e adicioná-las às já existentes?`)) return;
+        let importadas=0;
+        for(const t of dados){
+          const id=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
+          await window.FB.setDoc(window.FB.doc(window.FB.db,'tarefas',id), {
+            ...t, id, criadoPor: uidAtual, criadoPorEmail: emailAtual, criadoEm: window.FB.serverTimestamp()
+          });
+          importadas++;
+        }
+        pagina=1;
+        toast(`Importado com sucesso (${importadas} tarefas).`,'success');
       } else { toast('Formato inválido.','error'); }
-    } catch(err){ toast('Erro ao importar JSON.','error'); }
+    } catch(err){ console.error(err); toast('Erro ao importar JSON.','error'); }
     e.target.value='';
   };
   reader.readAsText(file);
