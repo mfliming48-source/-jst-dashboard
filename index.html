@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Dashboard Técnica — JS Technology</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#46688a">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,33 +16,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f0f2f5;
+      --bg: #f3efe7;
       --surface: #ffffff;
-      --surface2: #f5f6f8;
-      --surface3: #eceef2;
-      --border: rgba(0,0,0,0.09);
-      --border-strong: rgba(0,0,0,0.18);
-      --text: #16181d;
-      --text-muted: #6b7280;
-      --text-faint: #9ca3af;
-      --blue: #2563eb;
-      --blue-light: #dbeafe;
-      --blue-text: #1d4ed8;
-      --green: #16a34a;
-      --green-light: #dcfce7;
-      --green-text: #15803d;
-      --amber: #d97706;
-      --amber-light: #fef3c7;
-      --amber-text: #b45309;
-      --red: #dc2626;
-      --red-light: #fee2e2;
-      --red-text: #b91c1c;
-      --purple: #7c3aed;
-      --purple-light: #ede9fe;
-      --purple-text: #6d28d9;
-      --teal: #0d9488;
-      --teal-light: #ccfbf1;
-      --teal-text: #0f766e;
+      --surface2: #f5f1ea;
+      --surface3: #ece5d8;
+      --border: rgba(60,48,32,0.10);
+      --border-strong: rgba(60,48,32,0.20);
+      --text: #2c2620;
+      --text-muted: #766e60;
+      --text-faint: #a89f8e;
+      --blue: #46688a;
+      --blue-light: #e2e9ef;
+      --blue-text: #33506d;
+      --green: #5e7d4f;
+      --green-light: #e6ebdd;
+      --green-text: #46602f;
+      --amber: #b9782f;
+      --amber-light: #f2e4cd;
+      --amber-text: #8f5c1f;
+      --red: #a44a3a;
+      --red-light: #f1ddd6;
+      --red-text: #813729;
+      --purple: #7c6a86;
+      --purple-light: #ebe5ee;
+      --purple-text: #5e4d68;
+      --teal: #4b7a72;
+      --teal-light: #dde9e5;
+      --teal-text: #375d56;
       --radius: 12px;
       --radius-sm: 8px;
       --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
@@ -52,59 +52,59 @@
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0f1117;
-        --surface: #1a1d24;
-        --surface2: #22262f;
-        --surface3: #2a2f3a;
-        --border: rgba(255,255,255,0.09);
-        --border-strong: rgba(255,255,255,0.18);
-        --text: #e8eaf0;
-        --text-muted: #9ca3af;
-        --text-faint: #6b7280;
-        --blue: #3b82f6;
-        --blue-light: #1e3a5f;
-        --blue-text: #93c5fd;
-        --green: #22c55e;
-        --green-light: #14532d;
-        --green-text: #86efac;
-        --amber: #f59e0b;
-        --amber-light: #451a03;
-        --amber-text: #fcd34d;
-        --red: #ef4444;
-        --red-light: #450a0a;
-        --red-text: #fca5a5;
-        --purple: #a78bfa;
-        --purple-light: #2e1065;
-        --purple-text: #c4b5fd;
-        --teal: #2dd4bf;
-        --teal-light: #042f2e;
-        --teal-text: #5eead4;
+        --bg: #1b1712;
+        --surface: #24201a;
+        --surface2: #2b261f;
+        --surface3: #342e25;
+        --border: rgba(255,250,240,0.09);
+        --border-strong: rgba(255,250,240,0.18);
+        --text: #ece6da;
+        --text-muted: #a89f8e;
+        --text-faint: #766e60;
+        --blue: #7ea0bf;
+        --blue-light: #33465a;
+        --blue-text: #b7cbdd;
+        --green: #93ad80;
+        --green-light: #3a4530;
+        --green-text: #c3d4b3;
+        --amber: #d3994f;
+        --amber-light: #4a3620;
+        --amber-text: #eac68c;
+        --red: #c47764;
+        --red-light: #4a2f27;
+        --red-text: #e2ac9b;
+        --purple: #a596ac;
+        --purple-light: #3c3441;
+        --purple-text: #cabfd0;
+        --teal: #7fa79e;
+        --teal-light: #2c3f3a;
+        --teal-text: #b3cfc7;
         --shadow: 0 1px 3px rgba(0,0,0,0.4);
         --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
       }
     }
     html[data-theme="dark"]{
-      --bg:#0f1117;--surface:#1a1d24;--surface2:#22262f;--surface3:#2a2f3a;
-      --border:rgba(255,255,255,0.09);--border-strong:rgba(255,255,255,0.18);
-      --text:#e8eaf0;--text-muted:#9ca3af;--text-faint:#6b7280;
-      --blue:#3b82f6;--blue-light:#1e3a5f;--blue-text:#93c5fd;
-      --green:#22c55e;--green-light:#14532d;--green-text:#86efac;
-      --amber:#f59e0b;--amber-light:#451a03;--amber-text:#fcd34d;
-      --red:#ef4444;--red-light:#450a0a;--red-text:#fca5a5;
-      --purple:#a78bfa;--purple-light:#2e1065;--purple-text:#c4b5fd;
-      --teal:#2dd4bf;--teal-light:#042f2e;--teal-text:#5eead4;
+      --bg:#1b1712;--surface:#24201a;--surface2:#2b261f;--surface3:#342e25;
+      --border:rgba(255,250,240,0.09);--border-strong:rgba(255,250,240,0.18);
+      --text:#ece6da;--text-muted:#a89f8e;--text-faint:#766e60;
+      --blue:#7ea0bf;--blue-light:#33465a;--blue-text:#b7cbdd;
+      --green:#93ad80;--green-light:#3a4530;--green-text:#c3d4b3;
+      --amber:#d3994f;--amber-light:#4a3620;--amber-text:#eac68c;
+      --red:#c47764;--red-light:#4a2f27;--red-text:#e2ac9b;
+      --purple:#a596ac;--purple-light:#3c3441;--purple-text:#cabfd0;
+      --teal:#7fa79e;--teal-light:#2c3f3a;--teal-text:#b3cfc7;
       --shadow:0 1px 3px rgba(0,0,0,0.4);--shadow-md:0 4px 16px rgba(0,0,0,0.5);
     }
     html[data-theme="light"]{
-      --bg:#f0f2f5;--surface:#ffffff;--surface2:#f5f6f8;--surface3:#eceef2;
-      --border:rgba(0,0,0,0.09);--border-strong:rgba(0,0,0,0.18);
-      --text:#16181d;--text-muted:#6b7280;--text-faint:#9ca3af;
-      --blue:#2563eb;--blue-light:#dbeafe;--blue-text:#1d4ed8;
-      --green:#16a34a;--green-light:#dcfce7;--green-text:#15803d;
-      --amber:#d97706;--amber-light:#fef3c7;--amber-text:#b45309;
-      --red:#dc2626;--red-light:#fee2e2;--red-text:#b91c1c;
-      --purple:#7c3aed;--purple-light:#ede9fe;--purple-text:#6d28d9;
-      --teal:#0d9488;--teal-light:#ccfbf1;--teal-text:#0f766e;
+      --bg:#f3efe7;--surface:#ffffff;--surface2:#f5f1ea;--surface3:#ece5d8;
+      --border:rgba(60,48,32,0.10);--border-strong:rgba(60,48,32,0.20);
+      --text:#2c2620;--text-muted:#766e60;--text-faint:#a89f8e;
+      --blue:#46688a;--blue-light:#e2e9ef;--blue-text:#33506d;
+      --green:#5e7d4f;--green-light:#e6ebdd;--green-text:#46602f;
+      --amber:#b9782f;--amber-light:#f2e4cd;--amber-text:#8f5c1f;
+      --red:#a44a3a;--red-light:#f1ddd6;--red-text:#813729;
+      --purple:#7c6a86;--purple-light:#ebe5ee;--purple-text:#5e4d68;
+      --teal:#4b7a72;--teal-light:#dde9e5;--teal-text:#375d56;
       --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
       --shadow-md:0 4px 16px rgba(0,0,0,0.10),0 2px 4px rgba(0,0,0,0.05);
     }
@@ -143,10 +143,9 @@
     .btn-edit{background:transparent;color:var(--blue-text);border-color:transparent;padding:7px 10px}
     .btn-edit:hover{background:var(--blue-light);border-color:transparent}
     body.modo-leitor .btn-edit,
-    body.modo-leitor .btn-danger.btn-icon{display:none}
+    body.modo-leitor .btn-danger{display:none}
     body.modo-leitor .btn-importar-json{display:none}
     .btn-sm{padding:6px 12px;font-size:12px}
-    .btn-icon{padding:7px;border-radius:var(--radius-sm)}
     label.btn{cursor:pointer}
 
     /* ====== PAGE TITLE ====== */
@@ -212,8 +211,6 @@
     @media(min-width:640px){.table-header{flex-direction:row;align-items:center;justify-content:space-between}}
     .table-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .search-wrap{position:relative;flex:1;min-width:160px;max-width:260px}
-    .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-faint);pointer-events:none}
-    .search-input{padding-left:32px!important}
     .filter-select{max-width:150px}
     .table-wrap{overflow-x:auto;margin:-4px -4px 0;padding:4px 4px 0}
     table{width:100%;border-collapse:collapse;font-size:13px}
@@ -251,7 +248,6 @@
 
     /* ====== EMPTY STATE ====== */
     .empty-state{text-align:center;padding:48px 20px;color:var(--text-muted)}
-    .empty-icon{font-size:38px;margin-bottom:12px;opacity:0.3}
     .empty-title{font-size:14px;font-weight:500;margin-bottom:4px}
     .empty-sub{font-size:12.5px}
 
@@ -316,9 +312,8 @@
     .nav-pill.active{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
 
     /* ====== FAB (mobile quick add) ====== */
-    .fab{display:none;position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:none;align-items:center;justify-content:center;box-shadow:var(--shadow-md);cursor:pointer;z-index:200}
+    .fab{display:none;position:fixed;bottom:20px;right:20px;width:64px;height:64px;border-radius:50%;background:var(--blue);color:#fff;border:none;align-items:center;justify-content:center;box-shadow:var(--shadow-md);cursor:pointer;z-index:200;font-family:inherit;font-size:12.5px;font-weight:600}
     .fab:active{transform:scale(0.95)}
-    .fab svg{width:24px;height:24px}
     @media(max-width:767px){.fab{display:flex}}
 
     /* ====== THEME TOGGLE ====== */
@@ -348,7 +343,6 @@
       body{background:white}
     }
 
-    svg.icon{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;flex-shrink:0}
 
     /* ====== PROGRESS RING ====== */
     .progress-ring{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-muted);margin-top:6px}
@@ -460,24 +454,31 @@
   });
 </script>
 
-<div id="loginOverlay" style="display:flex; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; background:var(--bg, #f0f2f5); font-family: 'DM Sans', sans-serif;">
-  <form id="loginForm" style="background:var(--surface,#fff); border:1px solid var(--border,#e5e7eb); border-radius:16px; padding:36px 32px; width:100%; max-width:340px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
-    <div style="text-align:center; margin-bottom:20px;">
-      <div style="width:48px; height:48px; border-radius:12px; background:#2563eb; color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:16px;">JS</div>
-      <div style="font-weight:700; font-size:16px; color:var(--text,#16181d);">JS Technology, Lda</div>
-      <div style="font-size:13px; color:var(--text-muted,#6b7280);">Dashboard Técnica</div>
+<div id="loginOverlay" style="display:flex; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 30%, #1c2126 0%, #12161a 70%); font-family: 'DM Sans', sans-serif;">
+  <div style="width:100%; max-width:380px; padding:0 20px;">
+    <div style="text-align:center; margin-bottom:26px;">
+      <div style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:5px; color:#e8763c; font-weight:600;">AREA TECNICA</div>
+      <div style="font-size:23px; font-weight:700; color:#f2ede4; letter-spacing:-0.3px; margin-top:6px;">GESTAO DE TAREFAS</div>
+      <div style="font-size:12px; color:#7c8792; margin-top:8px;">JS Technology, Lda &mdash; Dashboard Técnica</div>
     </div>
-    <div style="margin-bottom:12px;">
-      <label style="display:block; font-size:12px; color:var(--text-muted,#6b7280); margin-bottom:4px;">Email</label>
-      <input id="loginEmail" type="email" required autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%; padding:10px 12px; border:1px solid var(--border,#e5e7eb); border-radius:8px; font-size:14px; box-sizing:border-box;">
+    <form id="loginForm" style="background:#1c2126; border:1px solid #2a3138; border-top:3px solid #e8763c; border-radius:6px; padding:32px 28px; box-shadow:0 20px 50px rgba(0,0,0,0.45);">
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:11px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#7c8792; margin-bottom:6px;">ID de Utilizador</label>
+        <input id="loginEmail" type="email" required autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%; padding:11px 12px; border:1px solid #333b43; border-radius:4px; font-size:14px; font-family:'DM Mono',monospace; background:#14181c; color:#f2ede4; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-size:11px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#7c8792; margin-bottom:6px;">Palavra-passe</label>
+        <input id="loginPass" type="password" required autocomplete="current-password" style="width:100%; padding:11px 12px; border:1px solid #333b43; border-radius:4px; font-size:14px; background:#14181c; color:#f2ede4; box-sizing:border-box;">
+      </div>
+      <div id="loginErro" style="display:none; color:#e8a389; font-size:12.5px; margin-bottom:14px; padding:9px 10px; background:rgba(232,118,60,0.08); border-left:2px solid #e8763c; border-radius:2px;"></div>
+      <button id="loginBtn" type="submit" style="width:100%; padding:12px; border:none; border-radius:4px; background:#e8763c; color:#14181c; font-weight:700; font-size:13.5px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer;">Entrar</button>
+    </form>
+    <div style="display:flex; justify-content:center; align-items:center; gap:14px; margin-top:22px; font-size:10.5px; letter-spacing:0.5px; color:#4a545e; text-transform:uppercase;">
+      <span>Consola de Despacho</span>
+      <span style="opacity:0.5;">&middot;</span>
+      <span>Ligação Segura</span>
     </div>
-    <div style="margin-bottom:16px;">
-      <label style="display:block; font-size:12px; color:var(--text-muted,#6b7280); margin-bottom:4px;">Password</label>
-      <input id="loginPass" type="password" required autocomplete="current-password" style="width:100%; padding:10px 12px; border:1px solid var(--border,#e5e7eb); border-radius:8px; font-size:14px; box-sizing:border-box;">
-    </div>
-    <div id="loginErro" style="display:none; color:#b91c1c; font-size:13px; margin-bottom:12px;"></div>
-    <button id="loginBtn" type="submit" style="width:100%; padding:11px; border:none; border-radius:8px; background:#2563eb; color:#fff; font-weight:600; font-size:14px; cursor:pointer;">Entrar</button>
-  </form>
+  </div>
 </div>
 
 <div class="app-shell" style="display:none;">
@@ -495,17 +496,14 @@
   </div>
   <div class="topbar-right">
     <span class="topbar-date hide-mobile" id="topbarDate"></span>
-    <button class="btn btn-icon theme-toggle" id="themeToggleBtn" onclick="alternarTema()" title="Alternar tema" aria-label="Alternar tema claro/escuro">
-      <svg class="icon" viewBox="0 0 24 24" id="themeIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <button class="btn btn-sm theme-toggle" id="themeToggleBtn" onclick="alternarTema()" title="Alternar tema" aria-label="Alternar tema claro/escuro">
+      <span id="themeToggleLabel">Modo escuro</span>
     </button>
     <button class="btn btn-primary btn-sm" onclick="abrirModalNova()" title="Atalho: N">
-      <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span class="hide-mobile">Nova Tarefa</span><span style="display:none" class="show-mobile">Nova</span>
     </button>
     <span id="badgeUtilizador" class="hide-mobile" style="font-size:12px; color:var(--text-muted); padding:0 6px; white-space:nowrap;"></span>
-    <button class="btn btn-icon" id="btnLogout" title="Sair" aria-label="Sair">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    </button>
+    <button class="btn btn-sm" id="btnLogout" title="Sair" aria-label="Sair">Sair</button>
   </div>
 </header>
 
@@ -521,38 +519,32 @@
       </div>
       <div class="header-actions">
         <button class="btn btn-excel" onclick="exportarExcel()">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8l5 8 5-8"/></svg>
           <span class="hide-mobile">Exportar Excel</span><span class="show-mobile" style="display:none">Excel</span>
         </button>
         <button class="btn" onclick="exportarJSON()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span class="hide-mobile">Exportar JSON</span><span class="show-mobile" style="display:none">JSON</span>
         </button>
         <label class="btn btn-success btn-importar-json">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           Importar
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </label>
         <button class="btn" onclick="window.print()">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          <span class="hide-mobile">Imprimir</span><span class="show-mobile" style="display:none">🖨</span>
+          <span class="hide-mobile">Imprimir</span><span class="show-mobile" style="display:none">Imprimir</span>
         </button>
         <button class="btn" id="btnAbrirPastaDados" onclick="abrirPastaDados()" style="display:none">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          <span class="hide-mobile">Pasta de Dados</span><span class="show-mobile" style="display:none">📁</span>
+          <span class="hide-mobile">Pasta de Dados</span><span class="show-mobile" style="display:none">Dados</span>
         </button>
         <button class="btn" id="btnAbrirPastaBackup" onclick="abrirPastaBackup()" style="display:none" title="Abrir pasta dos backups automáticos">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 13a3 3 0 1 0 3 3"/><path d="M15 13v3h-3"/></svg>
-          <span class="hide-mobile">Pasta de Backup</span><span class="show-mobile" style="display:none">💾</span>
+          <span class="hide-mobile">Pasta de Backup</span><span class="show-mobile" style="display:none">Backup</span>
         </button>
       </div>
     </div>
 
     <!-- NAV PILLS -->
     <div class="nav-pills">
-      <button class="nav-pill active" onclick="mudarVista('tarefas')" id="pill-tarefas">📋 Tarefas</button>
-      <button class="nav-pill" onclick="mudarVista('tecnicos')" id="pill-tecnicos">👷 Por Técnico</button>
-      <button class="nav-pill" onclick="mudarVista('horas')" id="pill-horas">⏱ Horas</button>
+      <button class="nav-pill active" onclick="mudarVista('tarefas')" id="pill-tarefas">Tarefas</button>
+      <button class="nav-pill" onclick="mudarVista('tecnicos')" id="pill-tecnicos">Por Técnico</button>
+      <button class="nav-pill" onclick="mudarVista('horas')" id="pill-horas">Horas</button>
     </div>
   </div>
 
@@ -565,10 +557,7 @@
       <!-- CHART -->
       <div class="card" style="align-self:start">
         <div class="card-title-row">
-          <div class="card-title">
-            <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Horas por Técnico
-          </div>
+          <div class="card-title">Horas por Técnico</div>
           <div class="tabs" style="margin:0;flex:1;max-width:200px">
             <button class="tab active" onclick="mudarTabGrafico('mensal')" id="tab-mensal">Mensal</button>
             <button class="tab" onclick="mudarTabGrafico('semanal')" id="tab-semanal">Semanal</button>
@@ -585,8 +574,7 @@
           <div class="card-title" style="margin:0">Lista de Tarefas</div>
           <div class="table-filters">
             <div class="search-wrap">
-              <svg class="icon search-icon" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="pesquisa" type="search" placeholder="Pesquisar..." class="form-input search-input" style="max-width:220px">
+              <input id="pesquisa" type="search" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
             </div>
             <select id="filtroEstado" class="form-input filter-select">
               <option value="">Todos os estados</option>
@@ -607,7 +595,7 @@
             <input type="date" id="filtroData" class="form-input" style="max-width:155px" title="Data de referência do período">
             <input type="date" id="filtroDataInicio" class="form-input" style="max-width:155px;display:none" title="Data de início">
             <input type="date" id="filtroDataFim" class="form-input" style="max-width:155px;display:none" title="Data de fim">
-            <button class="btn btn-sm" onclick="limparFiltros()" title="Limpar filtros">✕</button>
+            <button class="btn btn-sm" onclick="limparFiltros()" title="Limpar filtros">Limpar</button>
           </div>
         </div>
 
@@ -615,13 +603,13 @@
           <table>
             <thead>
               <tr>
-                <th onclick="ordenarPor('tecnico')">Técnico <span class="sort-indicator" id="sort-tecnico">↕</span></th>
-                <th onclick="ordenarPor('tarefa')">Tarefa <span class="sort-indicator" id="sort-tarefa">↕</span></th>
-                <th onclick="ordenarPor('data')" class="hide-mobile">Data <span class="sort-indicator" id="sort-data">↕</span></th>
+                <th onclick="ordenarPor('tecnico')" title="Ordenar">Técnico<span class="sort-indicator" id="sort-tecnico"></span></th>
+                <th onclick="ordenarPor('tarefa')" title="Ordenar">Tarefa<span class="sort-indicator" id="sort-tarefa"></span></th>
+                <th onclick="ordenarPor('data')" class="hide-mobile" title="Ordenar">Data<span class="sort-indicator" id="sort-data"></span></th>
                 <th class="hide-mobile">Cliente</th>
                 <th class="hide-mobile">Folha / Guia</th>
-                <th onclick="ordenarPor('horas')">Horas <span class="sort-indicator" id="sort-horas">↕</span></th>
-                <th onclick="ordenarPor('estado')">Estado <span class="sort-indicator" id="sort-estado">↕</span></th>
+                <th onclick="ordenarPor('horas')" title="Ordenar">Horas<span class="sort-indicator" id="sort-horas"></span></th>
+                <th onclick="ordenarPor('estado')" title="Ordenar">Estado<span class="sort-indicator" id="sort-estado"></span></th>
                 <th style="text-align:right">Ações</th>
               </tr>
             </thead>
@@ -632,8 +620,8 @@
         <div class="pagination">
           <span class="page-info" id="pageInfo"></span>
           <div class="page-controls">
-            <button class="btn btn-sm" id="btnPrev" onclick="mudarPagina(-1)">← Anterior</button>
-            <button class="btn btn-sm" id="btnNext" onclick="mudarPagina(1)">Próxima →</button>
+            <button class="btn btn-sm" id="btnPrev" onclick="mudarPagina(-1)">Anterior</button>
+            <button class="btn btn-sm" id="btnNext" onclick="mudarPagina(1)">Próxima</button>
           </div>
         </div>
       </div>
@@ -644,7 +632,7 @@
   <div id="vista-tecnicos" style="display:none">
     <div class="card" style="margin-bottom:16px">
       <div class="card-title-row">
-        <div class="card-title">👷 Painel por Técnico</div>
+        <div class="card-title">Painel por Técnico</div>
         <div class="tabs" style="margin:0;max-width:240px">
           <button class="tab active" onclick="mudarTabTecnico('mensal')" id="tabt-mensal">Mensal</button>
           <button class="tab" onclick="mudarTabTecnico('semanal')" id="tabt-semanal">Semanal</button>
@@ -658,7 +646,7 @@
       <div class="card">
         <div class="card-title-row">
           <div class="card-title" id="tech-detail-title">Tarefas do Técnico</div>
-          <button class="btn btn-sm" onclick="document.getElementById('tech-detail-area').style.display='none'">✕ Fechar</button>
+          <button class="btn btn-sm" onclick="document.getElementById('tech-detail-area').style.display='none'">Fechar</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -683,7 +671,7 @@
   <div id="vista-horas" style="display:none">
     <div class="card" style="margin-bottom:16px">
       <div class="card-title-row">
-        <div class="card-title">⏱ Relatório de Horas</div>
+        <div class="card-title">Relatório de Horas</div>
         <div class="date-range-row">
           <div class="form-group">
             <label class="form-label">De</label>
@@ -707,9 +695,7 @@
 </div><!-- /app-shell -->
 
 <!-- FAB (mobile quick add) -->
-<button class="fab" onclick="abrirModalNova()" aria-label="Nova Tarefa" title="Nova Tarefa">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
+<button class="fab" onclick="abrirModalNova()" aria-label="Nova Tarefa" title="Nova Tarefa">Nova</button>
 
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
@@ -722,9 +708,6 @@
         Nova Tarefa
         <span class="editing-badge">A editar</span>
       </div>
-      <button class="btn btn-icon" onclick="fecharModal()" aria-label="Fechar">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="editIndex" value="-1">
@@ -791,10 +774,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarTarefa()">
-        <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Guardar
-      </button>
+      <button class="btn btn-primary" onclick="guardarTarefa()">Guardar</button>
     </div>
   </div>
 </div>
@@ -804,9 +784,6 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Detalhe da Tarefa</div>
-      <button class="btn btn-icon" onclick="fecharDetalhe()">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
     </div>
     <div class="modal-body" id="modalDetalheBody"></div>
     <div class="modal-footer">
@@ -827,13 +804,9 @@ try { tarefas = JSON.parse(localStorage.getItem('jst_tarefas_v2')) || []; } catc
 // ============================================================
 function aplicarTema(t){
   document.documentElement.setAttribute('data-theme', t);
-  const icon = document.getElementById('themeIcon');
-  if(!icon) return;
-  if(t==='dark'){
-    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-  } else {
-    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-  }
+  const label = document.getElementById('themeToggleLabel');
+  if(!label) return;
+  label.textContent = t==='dark' ? 'Modo claro' : 'Modo escuro';
 }
 function alternarTema(){
   const atual = document.documentElement.getAttribute('data-theme') ||
@@ -1099,16 +1072,16 @@ function renderizarStats() {
   const horasSemana = tarefas.filter(t=>t.data>=ini&&t.data<=fim).reduce((s,t)=>s+calcularHoras(t.horaInicio,t.horaFim),0);
 
   const stats = [
-    {label:'Total Tarefas', value:tarefas.length, color:'blue', sub:'registos', icon:'📋'},
-    {label:'Técnicos', value:tecnicos.size, color:'teal', sub:'activos', icon:'👷'},
-    {label:'Horas Totais', value:formatarHoras(totalHoras), color:'amber', sub:'acumuladas', icon:'⏱'},
-    {label:'Horas Hoje', value:formatarHoras(horasHoje), color:'purple', sub:formatarData(hj), icon:'📅'},
-    {label:'Horas Semana', value:formatarHoras(horasSemana), color:'green', sub:'semana actual', icon:'📆'},
-    {label:'Concluídas', value:concluidas, color:'green', sub:`${pendentes} pend. · ${em_and} em curso`, icon:'✓'},
+    {label:'Total Tarefas', value:tarefas.length, color:'blue', sub:'registos'},
+    {label:'Técnicos', value:tecnicos.size, color:'teal', sub:'activos'},
+    {label:'Horas Totais', value:formatarHoras(totalHoras), color:'amber', sub:'acumuladas'},
+    {label:'Horas Hoje', value:formatarHoras(horasHoje), color:'purple', sub:formatarData(hj)},
+    {label:'Horas Semana', value:formatarHoras(horasSemana), color:'green', sub:'semana actual'},
+    {label:'Concluídas', value:concluidas, color:'green', sub:`${pendentes} pend. · ${em_and} em curso`},
   ];
   document.getElementById('statsArea').innerHTML = stats.map(s=>`
     <div class="stat">
-      <div class="stat-label">${s.icon} ${s.label}</div>
+      <div class="stat-label">${s.label}</div>
       <div class="stat-value ${s.color}">${s.value}</div>
       <div class="stat-sub">${s.sub}</div>
     </div>`).join('');
@@ -1294,15 +1267,15 @@ function renderizarTabela() {
     if(!el) return;
     el.parentElement.classList.remove('sorted');
     if(ordenacao.campo===c){
-      el.textContent=ordenacao.dir==='asc'?'↑':'↓';
+      el.textContent=ordenacao.dir==='asc'?' (crescente)':' (decrescente)';
       el.parentElement.classList.add('sorted');
     } else {
-      el.textContent='↕';
+      el.textContent='';
     }
   });
 
   if (paginada.length===0) {
-    tbody.innerHTML='<tr><td colspan="8" style="padding:0"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sem tarefas encontradas</div><div class="empty-sub">Adicione uma tarefa ou ajuste os filtros.</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="8" style="padding:0"><div class="empty-state"><div class="empty-title">Sem tarefas encontradas</div><div class="empty-sub">Adicione uma tarefa ou ajuste os filtros.</div></div></td></tr>';
   } else {
     tbody.innerHTML = paginada.map(t=>{
       const idx=tarefas.indexOf(t);
@@ -1317,15 +1290,9 @@ function renderizarTabela() {
         <td data-label="Estado">${badgeEstado(t.estado)}</td>
         <td class="td-actions-cell">
           <div class="td-actions">
-            <button class="btn btn-icon" onclick="verDetalhe(${idx})" title="Detalhe" style="font-size:12px;color:var(--text-muted)">
-              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </button>
-            <button class="btn btn-edit btn-icon" onclick="editarTarefa(${idx})" title="Editar">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="btn btn-danger btn-icon" onclick="removerTarefa(${idx})" title="Remover">
-              <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            <button class="btn btn-sm" onclick="verDetalhe(${idx})" title="Ver detalhe">Ver</button>
+            <button class="btn btn-edit btn-sm" onclick="editarTarefa(${idx})" title="Editar">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="removerTarefa(${idx})" title="Remover">Remover</button>
           </div>
         </td>
       </tr>`;
@@ -1384,7 +1351,7 @@ function renderizarTecnicos() {
   const tecList = [...new Set(tarefas.map(t=>t.tecnico).filter(Boolean))].sort();
 
   if (tecList.length===0){
-    area.innerHTML='<div class="empty-state"><div class="empty-icon">👷</div><div class="empty-title">Sem técnicos registados</div></div>';
+    area.innerHTML='<div class="empty-state"><div class="empty-title">Sem técnicos registados</div></div>';
     return;
   }
 
@@ -1454,7 +1421,7 @@ function renderizarHoras() {
 
   const tecList = [...new Set(filtradas.map(t=>t.tecnico).filter(Boolean))].sort();
   if(tecList.length===0){
-    area.innerHTML='<div class="empty-state"><div class="empty-icon">⏱</div><div class="empty-title">Sem dados no período</div></div>';
+    area.innerHTML='<div class="empty-state"><div class="empty-title">Sem dados no período</div></div>';
     return;
   }
 
@@ -1858,8 +1825,7 @@ function toast(msg,tipo='info'){
   const c=document.getElementById('toastContainer');
   const el=document.createElement('div');
   el.className='toast '+tipo;
-  const icons={success:'✓',error:'✕',info:'ℹ'};
-  el.innerHTML=`<span>${icons[tipo]||'ℹ'}</span><span>${msg}</span>`;
+  el.innerHTML=`<span>${msg}</span>`;
   c.appendChild(el);
   setTimeout(()=>{ el.style.animation='slideOut 0.25s ease forwards'; setTimeout(()=>el.remove(),250); },3000);
 }
