@@ -1629,13 +1629,28 @@ function removerImagemExistente(i){
   imagensExistentes.splice(i,1);
   renderizarPreviewImagens();
 }
+// Lightbox simples para ampliar fotos — usa-se em vez de window.open()
+// porque os browsers bloqueiam a abertura de data: URLs em nova aba.
+function ampliarFoto(url){
+  let overlay = document.getElementById('lightboxFoto');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'lightboxFoto';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:24px;cursor:zoom-out';
+    overlay.innerHTML = '<img id="lightboxFotoImg" style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5)">';
+    overlay.onclick = ()=>{ overlay.style.display = 'none'; };
+    document.body.appendChild(overlay);
+  }
+  document.getElementById('lightboxFotoImg').src = url;
+  overlay.style.display = 'flex';
+}
 function renderizarPreviewImagens(){
   const wrap = document.getElementById('previewImagens');
   if(!wrap) return;
   let html = '';
   imagensExistentes.forEach((url,i)=>{
     html += `<div style="position:relative">
-      <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="window.open('${url}','_blank')">
+      <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="ampliarFoto('${url}')">
       <button type="button" onclick="removerImagemExistente(${i})" title="Remover" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button>
     </div>`;
   });
@@ -1738,7 +1753,7 @@ function verDetalhe(idx){
     html += `<div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:8px">
       <div class="detail-label">Fotos da Folha de Obra</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${t.imagens.map(img=>{const url=typeof img==='string'?img:(img&&img.url)||'';return url?`<img src="${url}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="window.open('${url}','_blank')">`:'';}).join('')}
+        ${t.imagens.map(img=>{const url=typeof img==='string'?img:(img&&img.url)||'';return url?`<img src="${url}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="ampliarFoto('${url}')">`:'';}).join('')}
       </div>
     </div>`;
   }
