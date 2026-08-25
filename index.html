@@ -366,9 +366,6 @@
     getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
     collection, onSnapshot, getDocs, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-  import {
-    getStorage, ref, uploadBytes, getDownloadURL, deleteObject
-  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAKjzH5r0Qy6_DI4GrnWiGQorH5BNTcb6M",
@@ -382,14 +379,12 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const storage = getStorage(app);
 
   // Expõe ao script principal (fora do module) através de window.FB
   window.FB = {
     auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc,
     collection, onSnapshot, getDocs, serverTimestamp,
-    signInWithEmailAndPassword, signOut,
-    storage, ref, uploadBytes, getDownloadURL, deleteObject
+    signInWithEmailAndPassword, signOut
   };
 
   const loginForm = document.getElementById('loginForm');
@@ -764,6 +759,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Fotos da Folha de Obra</label>
+        <div style="font-size:11px;color:var(--text-faint);margin-bottom:6px">Máximo 4 fotos por tarefa (comprimidas automaticamente)</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <label class="btn btn-sm" style="cursor:pointer">
             Adicionar Fotos
@@ -840,9 +836,8 @@ let ordenacao = { campo: 'data', dir: 'desc' };
 let pagina = 1;
 const POR_PAGINA = 15;
 let editando = false;
-let imagensNovas = [];       // File[] escolhidos agora, ainda por enviar
-let imagensExistentes = [];  // {url, path}[] já guardados na tarefa (modo edição)
-let imagensRemover = [];     // {url, path}[] marcados para apagar do Storage ao guardar
+let imagensNovas = [];       // dataURL[] (base64) escolhidos agora nesta sessão do formulário
+let imagensExistentes = [];  // dataURL[] já guardados na tarefa (modo edição)
 let vistaAtual = 'tarefas';
 let tabGrafico = 'mensal';
 let tabTecnico = 'mensal';
@@ -1535,8 +1530,8 @@ function editarTarefa(idx){
   document.getElementById('horaFim').value=t.horaFim||'';
   document.getElementById('estado').value=t.estado||'Pendente';
   document.getElementById('observacoes').value=t.observacoes||'';
-  imagensNovas=[]; imagensRemover=[];
-  imagensExistentes=Array.isArray(t.imagens)?t.imagens.slice():[];
+  imagensNovas=[];
+  imagensExistentes=Array.isArray(t.imagens)?t.imagens.map(img=>typeof img==='string'?img:(img&&img.url)||'').filter(Boolean):[];
   renderizarPreviewImagens();
   limparErros();
   abrirModal('modalOverlay');
@@ -1563,75 +1558,94 @@ function validar(){
 function limparErros(){ ['grp-tecnico','grp-tarefa','grp-data'].forEach(id=>document.getElementById(id)?.classList.remove('has-error')); }
 
 // ============================================================
-// FOTOS DA FOLHA DE OBRA (Firebase Storage)
+// FOTOS DA FOLHA DE OBRA (guardadas como base64 no Firestore)
+// Sem Firebase Storage: cada foto é comprimida no browser e
+// gravada como texto (data URL) dentro do próprio documento da
+// tarefa. O Firestore limita cada documento a 1 MB, por isso
+// limitamos o número de fotos e comprimimos bastante.
 // ============================================================
-function handleSelecaoImagens(e){
+const MAX_IMAGENS_POR_TAREFA = 4;
+const LARGURA_MAX_IMAGEM = 900;      // px
+const QUALIDADE_JPEG = 0.6;
+const ORCAMENTO_BYTES_IMAGENS = 700000; // ~700 KB de folga dentro do limite de 1 MB do documento
+
+function comprimirImagem(file){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = ()=>{ img.src = reader.result; };
+    reader.onerror = reject;
+    img.onload = ()=>{
+      let { width, height } = img;
+      if(width > LARGURA_MAX_IMAGEM){
+        height = Math.round(height * (LARGURA_MAX_IMAGEM / width));
+        width = LARGURA_MAX_IMAGEM;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', QUALIDADE_JPEG));
+    };
+    img.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function tamanhoTotalImagens(){
+  return imagensExistentes.reduce((s,i)=>s+i.length,0) + imagensNovas.reduce((s,i)=>s+i.length,0);
+}
+
+async function handleSelecaoImagens(e){
   const ficheiros = Array.from(e.target.files || []);
-  imagensNovas = imagensNovas.concat(ficheiros);
   e.target.value = '';
-  renderizarPreviewImagens();
+  const status = document.getElementById('imagensUploadStatus');
+  for(const file of ficheiros){
+    if(imagensExistentes.length + imagensNovas.length >= MAX_IMAGENS_POR_TAREFA){
+      toast(`Máximo de ${MAX_IMAGENS_POR_TAREFA} fotos por tarefa.`,'error');
+      break;
+    }
+    if(status) status.textContent = 'A comprimir foto...';
+    try{
+      const dataUrl = await comprimirImagem(file);
+      if(tamanhoTotalImagens() + dataUrl.length > ORCAMENTO_BYTES_IMAGENS){
+        toast('Limite de tamanho atingido — remova uma foto antes de adicionar outra.','error');
+        break;
+      }
+      imagensNovas.push(dataUrl);
+      renderizarPreviewImagens();
+    } catch(err){
+      console.error('Erro ao comprimir imagem:', err);
+      toast('Não foi possível processar essa foto.','error');
+    }
+  }
+  if(status) status.textContent = '';
 }
 function removerImagemNova(i){
   imagensNovas.splice(i,1);
   renderizarPreviewImagens();
 }
 function removerImagemExistente(i){
-  const img = imagensExistentes.splice(i,1)[0];
-  if(img) imagensRemover.push(img);
+  imagensExistentes.splice(i,1);
   renderizarPreviewImagens();
 }
 function renderizarPreviewImagens(){
   const wrap = document.getElementById('previewImagens');
   if(!wrap) return;
   let html = '';
-  imagensExistentes.forEach((img,i)=>{
+  imagensExistentes.forEach((url,i)=>{
     html += `<div style="position:relative">
-      <img src="${esc(img.url)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="window.open('${esc(img.url)}','_blank')">
+      <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="window.open('${url}','_blank')">
       <button type="button" onclick="removerImagemExistente(${i})" title="Remover" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button>
     </div>`;
   });
-  imagensNovas.forEach((file,i)=>{
-    const url = URL.createObjectURL(file);
+  imagensNovas.forEach((url,i)=>{
     html += `<div style="position:relative">
       <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
       <button type="button" onclick="removerImagemNova(${i})" title="Remover" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1">×</button>
     </div>`;
   });
   wrap.innerHTML = html;
-}
-async function enviarImagensNovas(taskId){
-  if(imagensNovas.length===0) return [];
-  const status = document.getElementById('imagensUploadStatus');
-  const enviadas = [];
-  for(let i=0;i<imagensNovas.length;i++){
-    const file = imagensNovas[i];
-    if(status) status.textContent = `A enviar foto ${i+1} de ${imagensNovas.length}...`;
-    const nomeFich = `${Date.now()}_${i}_${file.name}`.replace(/[^a-zA-Z0-9._-]/g,'_');
-    const path = `folhas-obra/${taskId}/${nomeFich}`;
-    const storageRef = window.FB.ref(window.FB.storage, path);
-    await window.FB.uploadBytes(storageRef, file);
-    const url = await window.FB.getDownloadURL(storageRef);
-    enviadas.push({ url, path });
-  }
-  if(status) status.textContent = '';
-  return enviadas;
-}
-async function apagarImagensRemovidas(){
-  for(const img of imagensRemover){
-    try{
-      await window.FB.deleteObject(window.FB.ref(window.FB.storage, img.path));
-    } catch(e){ console.warn('Não foi possível apagar imagem do Storage:', e); }
-  }
-  imagensRemover = [];
-}
-async function apagarTodasImagensDaTarefa(t){
-  if(!Array.isArray(t.imagens)) return;
-  for(const img of t.imagens){
-    if(!img || !img.path) continue;
-    try{
-      await window.FB.deleteObject(window.FB.ref(window.FB.storage, img.path));
-    } catch(e){ console.warn('Não foi possível apagar imagem do Storage:', e); }
-  }
 }
 
 async function guardarTarefa(){
@@ -1652,6 +1666,8 @@ async function guardarTarefa(){
 
   if(!window.FB || !uidAtual){ toast('Sem ligação à nuvem — tenta novamente.','error'); return; }
 
+  const imagensFinais = imagensExistentes.concat(imagensNovas);
+
   const btnGuardar = document.querySelector('#modalOverlay .modal-footer .btn-primary');
   if(btnGuardar){ btnGuardar.disabled = true; btnGuardar.textContent = 'A guardar...'; }
 
@@ -1660,9 +1676,6 @@ async function guardarTarefa(){
       if(!souAdmin){ toast('Apenas o administrador pode editar tarefas.','error'); return; }
       const t=tarefas[idx];
       if(!t || !t.id){ toast('Tarefa não encontrada.','error'); return; }
-      const novasEnviadas = await enviarImagensNovas(t.id);
-      await apagarImagensRemovidas();
-      const imagensFinais = imagensExistentes.concat(novasEnviadas);
       await window.FB.updateDoc(window.FB.doc(window.FB.db,'tarefas',t.id), {
         ...dadosForm,
         imagens: imagensFinais,
@@ -1672,10 +1685,9 @@ async function guardarTarefa(){
       toast('Tarefa atualizada.','success');
     } else {
       const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(16).slice(2));
-      const novasEnviadas = await enviarImagensNovas(id);
       await window.FB.setDoc(window.FB.doc(window.FB.db,'tarefas',id), {
         ...dadosForm,
-        imagens: novasEnviadas,
+        imagens: imagensFinais,
         id,
         criadoPor: uidAtual,
         criadoPorEmail: emailAtual,
@@ -1688,7 +1700,7 @@ async function guardarTarefa(){
     pagina=1;
   } catch(e){
     console.error('Erro ao guardar tarefa:', e);
-    toast('Não foi possível guardar a tarefa (ou as fotos) na nuvem.','error');
+    toast('Não foi possível guardar a tarefa (verifique o tamanho das fotos).','error');
   } finally {
     if(btnGuardar){ btnGuardar.disabled = false; btnGuardar.textContent = 'Guardar'; }
   }
@@ -1700,7 +1712,7 @@ function limparFormulario(){
     if(el) el.value='';
   });
   document.getElementById('estado').value='Pendente';
-  imagensNovas=[]; imagensExistentes=[]; imagensRemover=[];
+  imagensNovas=[]; imagensExistentes=[];
   renderizarPreviewImagens();
   const status=document.getElementById('imagensUploadStatus');
   if(status) status.textContent='';
@@ -1726,7 +1738,7 @@ function verDetalhe(idx){
     html += `<div class="detail-row" style="flex-direction:column;align-items:flex-start;gap:8px">
       <div class="detail-label">Fotos da Folha de Obra</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${t.imagens.map(img=>`<img src="${esc(img.url)}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="window.open('${esc(img.url)}','_blank')">`).join('')}
+        ${t.imagens.map(img=>{const url=typeof img==='string'?img:(img&&img.url)||'';return url?`<img src="${url}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="window.open('${url}','_blank')">`:'';}).join('')}
       </div>
     </div>`;
   }
@@ -1743,7 +1755,6 @@ async function removerTarefa(idx){
   const t=tarefas[idx];
   if(!t || !t.id){ toast('Tarefa não encontrada.','error'); return; }
   try{
-    await apagarTodasImagensDaTarefa(t);
     await window.FB.deleteDoc(window.FB.doc(window.FB.db,'tarefas',t.id));
     toast('Tarefa removida.','info');
   } catch(e){
