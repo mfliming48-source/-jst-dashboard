@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Dashboard Técnica — JS Technology</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#46688a">
+  <meta name="theme-color" content="#232a31">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -350,6 +350,173 @@
     .progress-bar-inner{height:100%;border-radius:99px;background:var(--green);transition:width 0.5s}
     .progress-bar-inner.amber{background:var(--amber)}
     .progress-bar-inner.blue{background:var(--blue)}
+
+/* ===================== FORTI-STYLE WIDGET LAYOUT ===================== */
+:root,html[data-theme="light"]{
+ --bg:#e9edf1;--surface:#ffffff;--surface2:#f4f6f8;--surface3:#e3e8ed;
+ --border:rgba(32,43,56,.14);--border-strong:rgba(32,43,56,.28);
+ --text:#1d2630;--text-muted:#55616e;--text-faint:#8794a1;
+ --blue:#2b6cb0;--blue-light:#dce9f6;--blue-text:#1f4f82;
+ --green:#4c9a2a;--green-light:#e0f0d6;--green-text:#37721d;
+ --amber:#d4881c;--amber-light:#fbebcf;--amber-text:#94590a;
+ --red:#cf3f35;--red-light:#fadcd9;--red-text:#9c2820;
+ --purple:#6f58a8;--purple-light:#e8e2f3;--purple-text:#4e3c80;
+ --teal:#168a82;--teal-light:#d3eeeb;--teal-text:#0f635d;
+ --radius:4px;--radius-sm:3px;
+ --shadow:0 1px 2px rgba(20,30,40,.08);--shadow-md:0 6px 20px rgba(20,30,40,.18);
+ --sb:#232a31;--sb-hover:#2d363f;--sb-text:#b7c1cb;--accent:#6ab536;
+}
+html[data-theme="dark"]{
+ --bg:#12161b;--surface:#1b2128;--surface2:#222a32;--surface3:#2c3640;
+ --border:rgba(255,255,255,.09);--border-strong:rgba(255,255,255,.2);
+ --text:#e4e9ee;--text-muted:#9aa7b4;--text-faint:#6c7885;
+ --blue:#5b9bdc;--blue-light:#1f3750;--blue-text:#a9cdf0;
+ --green:#78c04a;--green-light:#223a18;--green-text:#b4e08f;
+ --amber:#e0a040;--amber-light:#40300f;--amber-text:#f0cc86;
+ --red:#e5675d;--red-light:#442019;--red-text:#f2aaa3;
+ --purple:#a18ad6;--purple-light:#2e2646;--purple-text:#cdbfee;
+ --teal:#3fb6ab;--teal-light:#14383a;--teal-text:#8fded6;
+ --shadow:0 1px 2px rgba(0,0,0,.4);--shadow-md:0 6px 20px rgba(0,0,0,.55);
+ --sb:#0e1216;--sb-hover:#1a2128;--sb-text:#9aa7b4;--accent:#6ab536;
+}
+body{font-size:13.5px}
+.app-shell{grid-template-columns:224px minmax(0,1fr);grid-template-rows:1fr}
+.sidebar{background:var(--sb);color:var(--sb-text);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:120}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-brand .logo-text{color:#fff;font-size:14px}
+.sb-brand .logo-sub{color:var(--sb-text)}
+.logo-mark{border-radius:4px;background:var(--accent);color:#10161b}
+.sb-nav{display:flex;flex-direction:column;gap:2px;padding:12px 8px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;border-left:3px solid transparent;background:transparent;color:var(--sb-text);font:500 13px 'DM Sans',sans-serif;cursor:pointer;text-align:left;border-radius:0 3px 3px 0}
+.nav-item:hover{background:var(--sb-hover);color:#fff}
+.nav-item.active{background:var(--sb-hover);color:#fff;border-left-color:var(--accent)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.sb-foot{padding:12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:8px}
+.sb-user{font-size:11.5px;word-break:break-all;color:var(--sb-text)}
+.sb-foot .btn{background:var(--sb-hover);color:#e4e9ee;border-color:rgba(255,255,255,.1);justify-content:center}
+.sb-foot .btn:hover{border-color:var(--accent)}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{height:46px;padding:0 20px;background:var(--surface);box-shadow:none}
+.crumb{color:var(--text-muted);font-size:13px}
+.crumb-sep{color:var(--text-faint);margin:0 8px}
+.topbar-date{background:transparent;border:none;padding:0}
+.content{max-width:none;margin:0;padding:16px 20px 80px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.toolbar h1{font-size:18px;font-weight:600;letter-spacing:-.2px}
+.toolbar p{font-size:12.5px;color:var(--text-muted)}
+.btn{border-radius:3px}
+.btn-primary{background:var(--blue);border-color:var(--blue)}
+.stats{gap:10px;margin-bottom:12px}
+.stat{border-radius:4px;border-left:3px solid var(--border-strong);padding:11px 14px;box-shadow:var(--shadow)}
+.stat.c-blue{border-left-color:var(--blue)}.stat.c-green{border-left-color:var(--green)}.stat.c-amber{border-left-color:var(--amber)}
+.stat.c-red{border-left-color:var(--red)}.stat.c-purple{border-left-color:var(--purple)}.stat.c-teal{border-left-color:var(--teal)}
+.stat-label{text-transform:none;letter-spacing:0;font-size:12px;font-weight:500;margin-bottom:6px}
+.stat-value{font-size:24px}
+.wgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.w4{grid-column:span 4}.w6{grid-column:span 6}.w12{grid-column:span 12}
+.widget{background:var(--surface);border:1px solid var(--border);border-radius:4px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+.w-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px 8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);border-radius:3px 3px 0 0}
+.w-head h3{font-size:13px;font-weight:600}
+.w-tools{display:flex;align-items:center;gap:6px}
+.w-collapse{border:none;background:transparent;color:var(--text-faint);cursor:pointer;width:22px;height:22px;border-radius:3px;font-size:16px;line-height:1}
+.w-collapse:hover{background:var(--surface3);color:var(--text)}
+.widget.collapsed .w-body{display:none}
+.w-body{padding:14px}
+.w-body .tabs{margin:0;padding:2px}
+.w-donut{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.donut{width:136px;height:136px;flex-shrink:0}
+.donut-n{font-size:22px;font-weight:700;fill:var(--text)}
+.donut-s{font-size:9px;fill:var(--text-muted)}
+.legend{list-style:none;flex:1;min-width:140px}
+.legend button{width:100%;display:flex;align-items:center;gap:8px;padding:7px 4px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font:inherit;cursor:pointer;text-align:left}
+.legend li:last-child button{border-bottom:none}
+.legend button:hover{background:var(--surface2)}
+.legend b{margin-left:auto;font-family:'DM Mono',monospace;font-weight:500}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--text-faint)}
+.dot.amber{background:var(--amber)}.dot.blue{background:var(--blue)}.dot.green{background:var(--green)}
+.wk{display:flex;align-items:flex-end;gap:8px;height:150px}
+.wk-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)}
+.wk-bar{width:100%;max-width:34px;background:var(--blue);border-radius:2px 2px 0 0;min-height:2px}
+.wk-col.hoje .wk-bar{background:var(--accent)}
+.wk-col.hoje span:last-child{color:var(--text);font-weight:600}
+.rank-row{display:grid;grid-template-columns:minmax(80px,140px) 1fr 58px;align-items:center;gap:10px;padding:5px 0;font-size:12.5px}
+.rank-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-row .tr{height:8px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.rank-row .fl{height:100%;background:var(--teal)}
+.rank-row .ct{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);text-align:right}
+.recent{list-style:none}
+.recent li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);cursor:pointer}
+.recent li:last-child{border-bottom:none}
+.recent li:hover{background:var(--surface2)}
+.recent .t1{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent .t2{font-size:11.5px;color:var(--text-muted)}
+.recent .dt{font-size:11.5px;color:var(--text-faint);font-family:'DM Mono',monospace}
+.w-empty{padding:18px 0;text-align:center;color:var(--text-muted);font-size:12.5px}
+.card{border-radius:4px;padding:0}
+.card>.card-title-row,.card>.card-title{padding:9px 14px;margin:0;background:var(--surface2);border-bottom:1px solid var(--border);border-radius:3px 3px 0 0}
+.card>.card-title-row .card-title{font-size:13px}
+.card>div:not(.card-title-row):not(.card-title){padding:14px}
+.card>.card-title-row+div,.card>#tech-cards-area{padding:14px}
+th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12px}
+.form-label{text-transform:none;letter-spacing:0;font-size:12px}
+.nav-pills,.sticky-toolbar{display:none}
+.modal{border-radius:4px}
+@media(max-width:1180px){.w4{grid-column:span 6}}
+@media(max-width:860px){
+ .app-shell{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+ .sidebar{position:static;height:auto;flex-direction:row;align-items:center;flex-wrap:wrap}
+ .sb-brand{border-bottom:none}
+ .sb-nav{flex-direction:row;padding:4px;flex:1;overflow-x:auto}
+ .nav-item{border-left:none;border-bottom:3px solid transparent;border-radius:3px 3px 0 0}
+ .nav-item.active{border-bottom-color:var(--accent)}
+ .sb-foot{flex-direction:row;align-items:center;border-top:none;padding:6px 10px;width:100%;justify-content:space-between}
+ .sb-user{display:none}
+ .content{padding:12px 12px 90px}
+}
+@media(max-width:700px){.w4,.w6{grid-column:span 12}}
+
+/* ===== Cabeçalho fixo: só a área dos widgets faz scroll ===== */
+.app-shell{height:100vh;overflow:hidden}
+.main{height:100vh;min-height:0}
+.fixed-head{flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,.1);z-index:100}
+.head-inner{padding:14px 20px 12px}
+.head-inner .toolbar{margin-bottom:12px}
+.head-inner .stats{margin-bottom:0}
+.topbar{position:static}
+.content{flex:1;min-height:0;overflow-y:auto;padding-top:16px}
+@media(min-width:861px) and (max-height:640px){.head-inner .stats{display:none}}
+@media(max-width:860px){
+ .app-shell{height:auto;overflow:visible}
+ .main{height:auto}
+ .fixed-head{display:contents}
+ .topbar{position:sticky;top:0;z-index:100}
+ .head-inner{padding:12px 12px 0}
+ .content{overflow:visible}
+}
+@media print{.app-shell,.main,.content{height:auto!important;overflow:visible!important}.sidebar{display:none}}
+
+/* ===== Login estilo FortiGate ===== */
+.fg-login{position:fixed;inset:0;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;font-family:'DM Sans',sans-serif;
+ background:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(160deg,#27313a 0%,#151b21 70%);background-size:40px 40px,40px 40px,100% 100%}
+.fg-box{width:100%;max-width:400px;background:#fff;border-radius:4px;box-shadow:0 18px 50px rgba(0,0,0,.5);overflow:hidden;border-top:4px solid #6ab536}
+.fg-head{display:flex;align-items:center;gap:14px;padding:22px 28px;background:#f4f6f8;border-bottom:1px solid #dde3e8}
+.fg-mark{width:44px;height:44px;border-radius:4px;background:#6ab536;color:#10161b;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fg-host{font-size:17px;font-weight:700;color:#1d2630;letter-spacing:.2px}
+.fg-sub{font-size:12px;color:#5b6773;margin-top:2px}
+.fg-form{padding:24px 28px 20px}
+.fg-label{display:block;font-size:12.5px;font-weight:600;color:#3b4652;margin-bottom:6px}
+.fg-field{display:flex;align-items:center;gap:8px;border:1px solid #c4cdd5;border-radius:3px;background:#fff;padding:0 10px;margin-bottom:16px}
+.fg-field:focus-within{border-color:#2b6cb0;box-shadow:0 0 0 3px rgba(43,108,176,.18)}
+.fg-field svg{width:16px;height:16px;color:#7b8794;flex-shrink:0}
+.fg-field input{flex:1;min-width:0;border:none;outline:none;background:transparent;padding:11px 0;font:14px 'DM Sans',sans-serif;color:#1d2630}
+.fg-eye{border:none;background:transparent;color:#2b6cb0;font:500 12px 'DM Sans',sans-serif;cursor:pointer;padding:4px 0}
+.fg-erro{font-size:12.5px;color:#9c2820;background:#fadcd9;border-left:3px solid #cf3f35;padding:8px 10px;border-radius:2px;margin:-4px 0 14px}
+.fg-btn{width:100%;padding:11px;border:none;border-radius:3px;background:#4c9a2a;color:#fff;font:600 14px 'DM Sans',sans-serif;cursor:pointer}
+.fg-btn:hover{background:#43891f}
+.fg-btn:disabled{opacity:.7;cursor:wait}
+.fg-foot{display:flex;align-items:center;gap:8px;padding:12px 28px;border-top:1px solid #e3e8ed;background:#f9fafb;font-size:11.5px;color:#6b7783}
+.fg-led{width:8px;height:8px;border-radius:50%;background:#6ab536;flex-shrink:0}
+.fg-copy{font-size:11.5px;color:#7b8794}
   </style>
 </head>
 <body>
@@ -454,124 +621,124 @@
   });
 </script>
 
-<div id="loginOverlay" style="display:flex; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 30%, #1c2126 0%, #12161a 70%); font-family: 'DM Sans', sans-serif;">
-  <div style="width:100%; max-width:380px; padding:0 20px;">
-    <div style="text-align:center; margin-bottom:26px;">
-      <div style="font-family:'DM Mono',monospace; font-size:12px; letter-spacing:5px; color:#e8763c; font-weight:600;">AREA TECNICA</div>
-      <div style="font-size:23px; font-weight:700; color:#f2ede4; letter-spacing:-0.3px; margin-top:6px;">GESTAO DE TAREFAS</div>
-      <div style="font-size:12px; color:#7c8792; margin-top:8px;">JS Technology, Lda &mdash; Dashboard Técnica</div>
+<div id="loginOverlay" class="fg-login" style="display:flex">
+  <div class="fg-box">
+    <div class="fg-head">
+      <div class="fg-mark">JS</div>
+      <div>
+        <div class="fg-host">JST-DASHBOARD</div>
+        <div class="fg-sub">JS Technology, Lda &middot; Dashboard Técnica</div>
+      </div>
     </div>
-    <form id="loginForm" style="background:#1c2126; border:1px solid #2a3138; border-top:3px solid #e8763c; border-radius:6px; padding:32px 28px; box-shadow:0 20px 50px rgba(0,0,0,0.45);">
-      <div style="margin-bottom:16px;">
-        <label style="display:block; font-size:11px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#7c8792; margin-bottom:6px;">ID de Utilizador</label>
-        <input id="loginEmail" type="email" required autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%; padding:11px 12px; border:1px solid #333b43; border-radius:4px; font-size:14px; font-family:'DM Mono',monospace; background:#14181c; color:#f2ede4; box-sizing:border-box;">
+    <form id="loginForm" class="fg-form">
+      <label class="fg-label" for="loginEmail">Utilizador</label>
+      <div class="fg-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <input id="loginEmail" type="email" required autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="email@empresa.com">
       </div>
-      <div style="margin-bottom:20px;">
-        <label style="display:block; font-size:11px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#7c8792; margin-bottom:6px;">Palavra-passe</label>
-        <input id="loginPass" type="password" required autocomplete="current-password" style="width:100%; padding:11px 12px; border:1px solid #333b43; border-radius:4px; font-size:14px; background:#14181c; color:#f2ede4; box-sizing:border-box;">
+      <label class="fg-label" for="loginPass">Palavra-passe</label>
+      <div class="fg-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="1"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+        <input id="loginPass" type="password" required autocomplete="current-password" placeholder="Palavra-passe">
+        <button type="button" class="fg-eye" onclick="var i=document.getElementById('loginPass');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Mostrar':'Ocultar'">Mostrar</button>
       </div>
-      <div id="loginErro" style="display:none; color:#e8a389; font-size:12.5px; margin-bottom:14px; padding:9px 10px; background:rgba(232,118,60,0.08); border-left:2px solid #e8763c; border-radius:2px;"></div>
-      <button id="loginBtn" type="submit" style="width:100%; padding:12px; border:none; border-radius:4px; background:#e8763c; color:#14181c; font-weight:700; font-size:13.5px; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer;">Entrar</button>
+      <div id="loginErro" class="fg-erro" style="display:none"></div>
+      <button id="loginBtn" type="submit" class="fg-btn">Entrar</button>
     </form>
-    <div style="display:flex; justify-content:center; align-items:center; gap:14px; margin-top:22px; font-size:10.5px; letter-spacing:0.5px; color:#4a545e; text-transform:uppercase;">
-      <span>Consola de Despacho</span>
-      <span style="opacity:0.5;">&middot;</span>
-      <span>Ligação Segura</span>
-    </div>
+    <div class="fg-foot"><span class="fg-led"></span>Ligação segura &middot; Acesso restrito a utilizadores autorizados</div>
   </div>
+  <div class="fg-copy">&copy; JS Technology, Lda</div>
 </div>
 
 <div class="app-shell" style="display:none;">
 
-<!-- TOP BAR -->
-<header class="topbar">
-  <div class="topbar-left">
-    <div class="topbar-logo">
-      <div class="logo-mark">JS</div>
-      <div>
-        <div class="logo-text">JS Technology, Lda</div>
-        <div class="logo-sub">Dashboard Técnica</div>
-      </div>
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="logo-mark">JS</div>
+    <div>
+      <div class="logo-text">JS Technology, Lda</div>
+      <div class="logo-sub">Dashboard Técnica</div>
     </div>
   </div>
+  <nav class="sb-nav">
+    <button class="nav-item active" id="pill-tarefas" onclick="mudarVista('tarefas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Painel</button>
+    <button class="nav-item" id="pill-tecnicos" onclick="mudarVista('tecnicos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 4a4 4 0 010 8M22 21c0-3-2-5-4-5.5"/></svg>Técnicos</button>
+    <button class="nav-item" id="pill-horas" onclick="mudarVista('horas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horas</button>
+  </nav>
+  <div class="sb-foot">
+    <span id="badgeUtilizador" class="sb-user"></span>
+    <button class="btn btn-sm theme-toggle" id="themeToggleBtn" onclick="alternarTema()" title="Alternar tema"><span id="themeToggleLabel">Modo escuro</span></button>
+    <button class="btn btn-sm" id="btnLogout" title="Sair">Sair</button>
+  </div>
+</aside>
+
+<div class="main">
+<div class="fixed-head">
+<header class="topbar">
+  <div><span class="crumb">JS Technology</span><span class="crumb-sep">/</span><strong id="crumbPage">Painel</strong></div>
   <div class="topbar-right">
     <span class="topbar-date hide-mobile" id="topbarDate"></span>
-    <button class="btn btn-sm theme-toggle" id="themeToggleBtn" onclick="alternarTema()" title="Alternar tema" aria-label="Alternar tema claro/escuro">
-      <span id="themeToggleLabel">Modo escuro</span>
-    </button>
-    <button class="btn btn-primary btn-sm" onclick="abrirModalNova()" title="Atalho: N">
-      <span class="hide-mobile">Nova Tarefa</span><span style="display:none" class="show-mobile">Nova</span>
-    </button>
-    <span id="badgeUtilizador" class="hide-mobile" style="font-size:12px; color:var(--text-muted); padding:0 6px; white-space:nowrap;"></span>
-    <button class="btn btn-sm" id="btnLogout" title="Sair" aria-label="Sair">Sair</button>
+    <button class="btn btn-primary btn-sm" onclick="abrirModalNova()" title="Atalho: N">Nova tarefa</button>
   </div>
 </header>
+<div class="head-inner">
+  <div class="toolbar">
+    <div>
+      <h1>Gestão de tarefas</h1>
+      <p class="hide-mobile">Equipa, clientes, estados e horas num só painel</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-excel" onclick="exportarExcel()">Exportar Excel</button>
+      <button class="btn" onclick="exportarJSON()">Exportar JSON</button>
+      <label class="btn btn-success btn-importar-json">Importar<input type="file" id="importFile" accept="application/json" style="display:none"></label>
+      <button class="btn" onclick="window.print()">Imprimir</button>
+      <button class="btn" id="btnAbrirPastaDados" onclick="abrirPastaDados()" style="display:none">Pasta de dados</button>
+      <button class="btn" id="btnAbrirPastaBackup" onclick="abrirPastaBackup()" style="display:none">Pasta de backup</button>
+    </div>
+  </div>
+
+  <div class="stats" id="statsArea"></div>
+</div>
+</div><!-- /fixed-head -->
 
 <div class="content">
 
-  <!-- STICKY TOOLBAR: title, export/import/print actions, nav — fixed while scrolling -->
-  <div class="sticky-toolbar">
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-      <div class="page-title-group">
-        <h1>Gestão de Tarefas</h1>
-        <p class="hide-mobile">Controlo de horas, folhas de obra e técnicos</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn btn-excel" onclick="exportarExcel()">
-          <span class="hide-mobile">Exportar Excel</span><span class="show-mobile" style="display:none">Excel</span>
-        </button>
-        <button class="btn" onclick="exportarJSON()">
-          <span class="hide-mobile">Exportar JSON</span><span class="show-mobile" style="display:none">JSON</span>
-        </button>
-        <label class="btn btn-success btn-importar-json">
-          Importar
-          <input type="file" id="importFile" accept="application/json" style="display:none">
-        </label>
-        <button class="btn" onclick="window.print()">
-          <span class="hide-mobile">Imprimir</span><span class="show-mobile" style="display:none">Imprimir</span>
-        </button>
-        <button class="btn" id="btnAbrirPastaDados" onclick="abrirPastaDados()" style="display:none">
-          <span class="hide-mobile">Pasta de Dados</span><span class="show-mobile" style="display:none">Dados</span>
-        </button>
-        <button class="btn" id="btnAbrirPastaBackup" onclick="abrirPastaBackup()" style="display:none" title="Abrir pasta dos backups automáticos">
-          <span class="hide-mobile">Pasta de Backup</span><span class="show-mobile" style="display:none">Backup</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- NAV PILLS -->
-    <div class="nav-pills">
-      <button class="nav-pill active" onclick="mudarVista('tarefas')" id="pill-tarefas">Tarefas</button>
-      <button class="nav-pill" onclick="mudarVista('tecnicos')" id="pill-tecnicos">Por Técnico</button>
-      <button class="nav-pill" onclick="mudarVista('horas')" id="pill-horas">Horas</button>
-    </div>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats" id="statsArea"></div>
-
-  <!-- ===== VISTA: TAREFAS ===== -->
   <div id="vista-tarefas">
-    <div class="main-grid">
-      <!-- CHART -->
-      <div class="card" style="align-self:start">
-        <div class="card-title-row">
-          <div class="card-title">Horas por Técnico</div>
-          <div class="tabs" style="margin:0;flex:1;max-width:200px">
-            <button class="tab active" onclick="mudarTabGrafico('mensal')" id="tab-mensal">Mensal</button>
-            <button class="tab" onclick="mudarTabGrafico('semanal')" id="tab-semanal">Semanal</button>
+    <div class="wgrid">
+      <section class="widget w4">
+        <header class="w-head"><h3>Estado das tarefas</h3><div class="w-tools"><button class="w-collapse" onclick="this.closest('.widget').classList.toggle('collapsed')" title="Recolher">&minus;</button></div></header>
+        <div class="w-body" id="wEstado"></div>
+      </section>
+      <section class="widget w4">
+        <header class="w-head"><h3>Horas por técnico</h3><div class="w-tools">
+          <div class="tabs">
+            <button class="tab active" onclick="mudarTabGrafico('mensal')" id="tab-mensal">Mês</button>
+            <button class="tab" onclick="mudarTabGrafico('semanal')" id="tab-semanal">Semana</button>
             <button class="tab" onclick="mudarTabGrafico('diario')" id="tab-diario">Hoje</button>
           </div>
+          <button class="w-collapse" onclick="this.closest('.widget').classList.toggle('collapsed')" title="Recolher">&minus;</button></div></header>
+        <div class="w-body">
+          <div id="chartPeriodoLabel" style="font-size:11.5px;color:var(--text-faint);margin-bottom:8px"></div>
+          <div id="chartArea" class="chart-bar-wrap"></div>
         </div>
-        <div id="chartPeriodoLabel" style="font-size:11px;color:var(--text-faint);margin-bottom:10px;text-align:right"></div>
-        <div id="chartArea" class="chart-bar-wrap"></div>
-      </div>
-
-      <!-- TABLE CARD -->
-      <div class="card" style="min-width:0">
+      </section>
+      <section class="widget w4">
+        <header class="w-head"><h3>Horas da semana</h3><div class="w-tools"><button class="w-collapse" onclick="this.closest('.widget').classList.toggle('collapsed')" title="Recolher">&minus;</button></div></header>
+        <div class="w-body" id="wSemana"></div>
+      </section>
+      <section class="widget w6">
+        <header class="w-head"><h3>Clientes com mais tarefas</h3><div class="w-tools"><button class="w-collapse" onclick="this.closest('.widget').classList.toggle('collapsed')" title="Recolher">&minus;</button></div></header>
+        <div class="w-body" id="wClientes"></div>
+      </section>
+      <section class="widget w6">
+        <header class="w-head"><h3>Atividade recente</h3><div class="w-tools"><button class="w-collapse" onclick="this.closest('.widget').classList.toggle('collapsed')" title="Recolher">&minus;</button></div></header>
+        <div class="w-body" id="wRecentes" style="padding:6px 10px"></div>
+      </section>
+      <section class="widget w12" id="wTabela">
+        <header class="w-head"><h3>Lista de tarefas</h3><div class="w-tools"><button class="w-collapse" onclick="this.closest('.widget').classList.toggle('collapsed')" title="Recolher">&minus;</button></div></header>
+        <div class="w-body">
         <div class="table-header">
-          <div class="card-title" style="margin:0">Lista de Tarefas</div>
+          <span></span>
           <div class="table-filters">
             <div class="search-wrap">
               <input id="pesquisa" type="search" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
@@ -624,7 +791,8 @@
             <button class="btn btn-sm" id="btnNext" onclick="mudarPagina(1)">Próxima</button>
           </div>
         </div>
-      </div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -690,8 +858,8 @@
       <div id="horas-summary"></div>
     </div>
   </div>
-
 </div><!-- /content -->
+</div><!-- /main -->
 </div><!-- /app-shell -->
 
 <!-- FAB (mobile quick add) -->
@@ -988,30 +1156,31 @@ function abrirPastaBackup(){
 // ============================================================
 // DATE HELPERS
 // ============================================================
+function ymd(d){ const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
 function hoje() {
-  return new Date().toISOString().split('T')[0];
+  return ymd(new Date());
 }
 function inicioSemana() {
   const d = new Date();
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   d.setDate(diff);
-  return d.toISOString().split('T')[0];
+  return ymd(d);
 }
 function inicioMes() {
   const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+  return ymd(new Date(d.getFullYear(), d.getMonth(), 1));
 }
 function fimMes() {
   const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().split('T')[0];
+  return ymd(new Date(d.getFullYear(), d.getMonth()+1, 0));
 }
 function fimSemana() {
   const d = new Date();
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? 0 : 7);
   d.setDate(diff);
-  return d.toISOString().split('T')[0];
+  return ymd(d);
 }
 
 function calcularHoras(inicio, fim) {
@@ -1061,7 +1230,7 @@ function mudarVista(vista) {
     document.getElementById('vista-'+v).style.display = v===vista ? '' : 'none';
     document.getElementById('pill-'+v).classList.toggle('active', v===vista);
   });
-  vistaAtual = vista;
+  vistaAtual = vista; const cp=document.getElementById('crumbPage'); if(cp) cp.textContent={tarefas:'Painel',tecnicos:'Técnicos',horas:'Horas'}[vista];
   if (vista==='horas') renderizarHoras();
   if (vista==='tecnicos') renderizarTecnicos();
 }
@@ -1094,7 +1263,7 @@ function renderizarStats() {
     {label:'Concluídas', value:concluidas, color:'green', sub:`${pendentes} pend. · ${em_and} em curso`},
   ];
   document.getElementById('statsArea').innerHTML = stats.map(s=>`
-    <div class="stat">
+    <div class="stat c-${s.color}">
       <div class="stat-label">${s.label}</div>
       <div class="stat-value ${s.color}">${s.value}</div>
       <div class="stat-sub">${s.sub}</div>
@@ -1172,14 +1341,14 @@ function obterRangePeriodo(tipo, dataRef) {
     const diffIni = ref.getDate() - dia + (dia === 0 ? -6 : 1);
     const inicioD = new Date(ref); inicioD.setDate(diffIni);
     const fimD = new Date(inicioD); fimD.setDate(inicioD.getDate() + 6);
-    const inicio = inicioD.toISOString().split('T')[0];
-    const fim = fimD.toISOString().split('T')[0];
+    const inicio = ymd(inicioD);
+    const fim = ymd(fimD);
     return { inicio, fim, texto: `SEMANA DE ${formatarData(inicio)} A ${formatarData(fim)}`, slug: `Semana_${inicio}_a_${fim}` };
   }
   if (tipo === 'mes') {
     const [ano, mes] = dataRef.split('-');
     const inicio = `${ano}-${mes}-01`;
-    const fim = new Date(Number(ano), Number(mes), 0).toISOString().split('T')[0];
+    const fim = ymd(new Date(Number(ano), Number(mes), 0));
     const nomeMes = new Date(Number(ano), Number(mes) - 1, 1)
       .toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' }).toUpperCase();
     return { inicio, fim, texto: nomeMes, slug: `${ano}-${mes}` };
@@ -1299,7 +1468,7 @@ function renderizarTabela() {
         <td data-label="Tarefa"><span class="td-task" title="${esc(t.tarefa)}">${esc(t.tarefa)}</span></td>
         <td class="hide-mobile-col" data-label="Data">${formatarData(t.data)}</td>
         <td class="hide-mobile-col td-cliente" data-label="Cliente">${esc(t.cliente||'-')}</td>
-        <td class="hide-mobile-col" data-label="Folha / Guia"><span style="font-size:11.5px;color:var(--text-muted)">${esc(t.folhaObra)||'-'}<br>${esc(t.guiaSaida)||'-'}</span>${Array.isArray(t.imagens)&&t.imagens.length>0?`<div style="margin-top:4px;font-size:10.5px;color:var(--blue-text);display:flex;align-items:center;gap:3px">📷 ${t.imagens.length}</div>`:''}</td>
+        <td class="hide-mobile-col" data-label="Folha / Guia"><span style="font-size:11.5px;color:var(--text-muted)">${esc(t.folhaObra)||'-'}<br>${esc(t.guiaSaida)||'-'}</span>${Array.isArray(t.imagens)&&t.imagens.length>0?`<div style="margin-top:4px;font-size:10.5px;color:var(--blue-text);display:flex;align-items:center;gap:3px">${t.imagens.length} foto${t.imagens.length>1?'s':''}</div>`:''}</td>
         <td class="td-hours" data-label="Horas">${horas>0?formatarHoras(horas):(t.horaInicio&&t.horaFim?t.horaInicio+'-'+t.horaFim:'-')}</td>
         <td data-label="Estado">${badgeEstado(t.estado)}</td>
         <td class="td-actions-cell">
@@ -1983,6 +2152,71 @@ function esc(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+
+// ============================================================
+// WIDGETS DO PAINEL
+// ============================================================
+function estadoNorm(t){ return t.estado==='Concluido' ? 'Concluído' : t.estado; }
+function corEstado(e){ return e==='Pendente' ? 'amber' : e==='Em andamento' ? 'blue' : 'green'; }
+function filtrarEstado(e){
+  document.getElementById('filtroEstado').value = e;
+  pagina = 1; renderizarTabela();
+  document.getElementById('wTabela').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderizarWidgets(){
+  // --- Estado (donut) ---
+  const cont = {'Pendente':0,'Em andamento':0,'Concluído':0};
+  tarefas.forEach(t=>{ const e=estadoNorm(t); if(e in cont) cont[e]++; });
+  const total = tarefas.length, R = 52, C = 2*Math.PI*R;
+  const cores = {'Pendente':'var(--amber)','Em andamento':'var(--blue)','Concluído':'var(--green)'};
+  let off = 0;
+  const arcos = Object.entries(cont).map(([k,v])=>{
+    const len = total ? v/total*C : 0;
+    const s = `<circle cx="70" cy="70" r="${R}" fill="none" stroke="${cores[k]}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;
+    off += len; return s;
+  }).join('');
+  const pct = total ? Math.round(cont['Concluído']/total*100) : 0;
+  document.getElementById('wEstado').innerHTML = `<div class="w-donut">
+    <svg viewBox="0 0 140 140" class="donut" role="img" aria-label="Estado das tarefas">
+      <circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--surface3)" stroke-width="16"/>${arcos}
+      <text x="70" y="70" text-anchor="middle" class="donut-n">${pct}%</text>
+      <text x="70" y="86" text-anchor="middle" class="donut-s">concluído</text>
+    </svg>
+    <ul class="legend">${Object.entries(cont).map(([k,v])=>`<li><button onclick="filtrarEstado('${k}')"><span class="dot ${corEstado(k)}"></span>${k}<b>${v}</b></button></li>`).join('')}</ul>
+  </div>`;
+
+  // --- Horas da semana ---
+  const ini = inicioSemana(), nomes = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'], hj = hoje();
+  const dias = nomes.map((n,i)=>{
+    const d = new Date(ini+'T00:00:00'); d.setDate(d.getDate()+i);
+    const iso = ymd(d);
+    const h = tarefas.filter(t=>t.data===iso).reduce((s,t)=>s+calcularHoras(t.horaInicio,t.horaFim),0);
+    return {n,iso,h};
+  });
+  const maxD = Math.max(...dias.map(d=>d.h),1);
+  document.getElementById('wSemana').innerHTML = `<div class="wk">${dias.map(d=>
+    `<div class="wk-col${d.iso===hj?' hoje':''}" title="${formatarData(d.iso)}"><span>${d.h?formatarHoras(d.h):''}</span><div class="wk-bar" style="height:${Math.round(d.h/maxD*100)}px"></div><span>${d.n}</span></div>`).join('')}</div>`;
+
+  // --- Clientes ---
+  const porCli = {};
+  tarefas.forEach(t=>{
+    if(!t.cliente) return;
+    const o = porCli[t.cliente] || (porCli[t.cliente]={n:0,aberta:0});
+    o.n++; if(estadoNorm(t)!=='Concluído') o.aberta++;
+  });
+  const cli = Object.entries(porCli).sort((a,b)=>b[1].n-a[1].n).slice(0,6);
+  const maxC = Math.max(...cli.map(c=>c[1].n),1);
+  document.getElementById('wClientes').innerHTML = cli.length
+    ? cli.map(([nome,o])=>`<div class="rank-row"><span class="nm" title="${esc(nome)}">${esc(nome)}</span><div class="tr"><div class="fl" style="width:${o.n/maxC*100}%"></div></div><span class="ct">${o.n} · ${o.aberta} aberta${o.aberta!==1?'s':''}</span></div>`).join('')
+    : '<div class="w-empty">Ainda não há tarefas associadas a clientes.</div>';
+
+  // --- Atividade recente ---
+  const rec = tarefas.slice(0,6);
+  document.getElementById('wRecentes').innerHTML = rec.length
+    ? `<ul class="recent">${rec.map(t=>`<li onclick="verDetalhe(${tarefas.indexOf(t)})"><span class="dot ${corEstado(estadoNorm(t))}"></span><div style="min-width:0"><div class="t1">${esc(t.tarefa)}</div><div class="t2">${esc(t.tecnico||'-')}${t.cliente?' &middot; '+esc(t.cliente):''}</div></div><span class="dt">${formatarData(t.data)}</span></li>`).join('')}</ul>`
+    : '<div class="w-empty">Sem atividade. Use "Nova tarefa" para começar.</div>';
+}
+
 // ============================================================
 // MAIN RENDER
 // ============================================================
@@ -1990,6 +2224,7 @@ function renderizar(){
   renderizarStats();
   renderizarTabela();
   renderizarGrafico();
+  renderizarWidgets();
   if(vistaAtual==='tecnicos') renderizarTecnicos();
   if(vistaAtual==='horas') renderizarHoras();
 }
