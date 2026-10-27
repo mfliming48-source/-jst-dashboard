@@ -801,7 +801,7 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
           <span></span>
           <div class="table-filters">
             <div class="search-wrap">
-              <input id="pesquisa" type="search" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
+              <input id="pesquisa" type="search" autocomplete="off" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
             </div>
             <select id="filtroEstado" class="form-input filter-select">
               <option value="">Todos os estados</option>
@@ -926,7 +926,7 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
         <div class="table-header">
           <span></span>
           <div class="table-filters">
-            <input id="levPesquisa" type="search" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
+            <input id="levPesquisa" type="search" autocomplete="off" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
             <select id="levFiltroEstado" class="form-input filter-select" style="max-width:190px"></select>
             <select id="levFiltroTecnico" class="form-input filter-select"></select>
             <button class="btn btn-sm" onclick="limparLevFiltros()">Limpar</button>
@@ -1331,6 +1331,7 @@ window.addEventListener('fbready', async function(e){
   uidAtual = e.detail.uid;
   emailAtual = e.detail.email;
   souAdmin = e.detail.papel === 'admin';
+  reporFiltrosIniciais();
   aplicarPermissoesUI();
   await migrarDadosAntigosSeNecessario();
   escutarTarefasEmTempoReal();
@@ -2732,6 +2733,24 @@ document.getElementById('modalNota').addEventListener('click',function(e){if(e.t
 document.getElementById('modalLembretes').addEventListener('click',function(e){if(e.target===this)fecharLembretes();});
 
 // ============================================================
+// FILTROS INICIAIS
+// Os browsers restauram ou preenchem automaticamente campos de
+// formulário (pesquisa, estado, período). Isso escondia tudo ao
+// abrir. Aqui os filtros arrancam sempre vazios.
+// ============================================================
+function reporFiltrosIniciais(){
+  ['pesquisa','filtroEstado','filtroTecnico','filtroPeriodoTipo','filtroData','filtroDataInicio','filtroDataFim','levPesquisa','levFiltroEstado','levFiltroTecnico'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.setAttribute('autocomplete','off'); el.value=''; }
+  });
+  document.getElementById('filtroData').style.display='';
+  document.getElementById('filtroDataInicio').style.display='none';
+  document.getElementById('filtroDataFim').style.display='none';
+  pagina=1; levPag=1;
+}
+window.addEventListener('pageshow',e=>{ if(e.persisted){ reporFiltrosIniciais(); renderizar(); renderizarLevantamentos(); } });
+
+// ============================================================
 // WIDGETS DO PAINEL
 // ============================================================
 function estadoNorm(t){ return t.estado==='Concluido' ? 'Concluído' : t.estado; }
@@ -2809,6 +2828,7 @@ function renderizar(){
 }
 
 // Set default dates for horas view
+reporFiltrosIniciais();
 document.getElementById('horasDataInicio').value = inicioMes();
 document.getElementById('horasDataFim').value = fimMes();
 

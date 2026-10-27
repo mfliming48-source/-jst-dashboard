@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jst-dashboard-v1';
+﻿const CACHE_NAME = 'jst-dashboard-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
