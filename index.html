@@ -517,7 +517,45 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
 .fg-foot{display:flex;align-items:center;gap:8px;padding:12px 28px;border-top:1px solid #e3e8ed;background:#f9fafb;font-size:11.5px;color:#6b7783}
 .fg-led{width:8px;height:8px;border-radius:50%;background:#6ab536;flex-shrink:0}
 .fg-copy{font-size:11.5px;color:#7b8794}
-  </style>
+  
+/* ===== Levantamentos ===== */
+.badge-cot{background:var(--purple-light);color:var(--purple-text)}
+.badge-forn{background:var(--red-light);color:var(--red-text)}
+.badge-recv{background:var(--teal-light);color:var(--teal-text)}
+.badge-entr{background:var(--green-light);color:var(--green-text)}
+.badge-canc{background:var(--surface3);color:var(--text-muted)}
+.stat-btn{cursor:pointer}
+.stat-btn:hover{border-color:var(--border-strong)}
+.lev-txt{max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.file-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.file-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12.5px}
+.file-ext{font:600 10.5px 'DM Mono',monospace;padding:2px 6px;border-radius:2px;background:var(--blue-light);color:var(--blue-text);flex-shrink:0}
+.file-ext.pdf{background:var(--red-light);color:var(--red-text)}
+.file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-size{color:var(--text-faint);font-family:'DM Mono',monospace;font-size:11.5px;flex-shrink:0}
+.file-x{border:none;background:transparent;color:var(--red-text);cursor:pointer;font:inherit;padding:2px 6px}
+@media(max-width:767px){.lev-txt{max-width:none;white-space:normal;text-align:right}}
+
+/* ===== Notas e lembretes ===== */
+.notas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.nota{border-radius:2px;padding:12px;min-height:140px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow-md);color:#2b2a22}
+.nota-txt{flex:1;white-space:pre-wrap;word-break:break-word;font-size:13.5px;line-height:1.45}
+.nota.feita{opacity:.55}
+.nota.feita .nota-txt{text-decoration:line-through}
+.nota-meta{font-size:11px;color:#5d5a48}
+.nota-lemb{font-size:11.5px;font-weight:600}
+.nota-lemb.atraso{color:#8a2a1e}
+.nota-acoes{display:flex;gap:4px;flex-wrap:wrap}
+.nota-acoes button{border:1px solid rgba(0,0,0,.18);background:rgba(255,255,255,.45);color:#2b2a22;font:500 11.5px 'DM Sans',sans-serif;padding:3px 8px;border-radius:3px;cursor:pointer}
+.nota-acoes button:hover{background:rgba(255,255,255,.8)}
+.cores{display:flex;gap:8px}
+.cor-op{width:28px;height:28px;border-radius:3px;border:2px solid transparent;cursor:pointer}
+.cor-op.sel{border-color:var(--text)}
+.lemb-sec{margin-bottom:14px}
+.lemb-sec h4{font-size:13px;font-weight:600;margin-bottom:4px}
+.lemb-sec ul{list-style:none}
+.lemb-mais{font-size:11.5px;color:var(--text-faint);padding-top:4px}
+</style>
 </head>
 <body>
 
@@ -564,7 +602,7 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
     e.preventDefault();
     loginErro.style.display = 'none';
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const pass = document.getElementById('loginPass').value.trim();
+    const pass = document.getElementById('loginPass').value;
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
     btn.textContent = 'A entrar...';
@@ -663,10 +701,13 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
   <nav class="sb-nav">
     <button class="nav-item active" id="pill-tarefas" onclick="mudarVista('tarefas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Painel</button>
     <button class="nav-item" id="pill-tecnicos" onclick="mudarVista('tecnicos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 4a4 4 0 010 8M22 21c0-3-2-5-4-5.5"/></svg>Técnicos</button>
+    <button class="nav-item" id="pill-levantamentos" onclick="mudarVista('levantamentos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Levantamentos</button>
+    <button class="nav-item" id="pill-notas" onclick="mudarVista('notas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v10l-6 6H4z"/><path d="M14 20v-6h6"/></svg>Notas</button>
     <button class="nav-item" id="pill-horas" onclick="mudarVista('horas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horas</button>
   </nav>
   <div class="sb-foot">
     <span id="badgeUtilizador" class="sb-user"></span>
+    <button class="btn btn-sm" onclick="abrirLembretes()" title="Ver pendentes">Pendentes <b id="badgeLemb">0</b></button>
     <button class="btn btn-sm theme-toggle" id="themeToggleBtn" onclick="alternarTema()" title="Alternar tema"><span id="themeToggleLabel">Modo escuro</span></button>
     <button class="btn btn-sm" id="btnLogout" title="Sair">Sair</button>
   </div>
@@ -678,10 +719,11 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
   <div><span class="crumb">JS Technology</span><span class="crumb-sep">/</span><strong id="crumbPage">Painel</strong></div>
   <div class="topbar-right">
     <span class="topbar-date hide-mobile" id="topbarDate"></span>
-    <button class="btn btn-primary btn-sm" onclick="abrirModalNova()" title="Atalho: N">Nova tarefa</button>
+    <button class="btn btn-primary btn-sm" id="btnNovoTopo" onclick="acaoNovo()" title="Atalho: N">Nova tarefa</button>
   </div>
 </header>
 <div class="head-inner">
+  <div id="headTarefas">
   <div class="toolbar">
     <div>
       <h1>Gestão de tarefas</h1>
@@ -698,6 +740,24 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
   </div>
 
   <div class="stats" id="statsArea"></div>
+  </div>
+  <div id="headLev" style="display:none">
+    <div class="toolbar">
+      <div>
+        <h1>Levantamentos</h1>
+        <p class="hide-mobile">Necessidades levantadas pela equipa técnica, com estado e documentos</p>
+      </div>
+    </div>
+    <div class="stats" id="levStats"></div>
+  </div>
+  <div id="headNotas" style="display:none">
+    <div class="toolbar">
+      <div>
+        <h1>Notas e lembretes</h1>
+        <p class="hide-mobile">Notas partilhadas pela equipa. As que têm data aparecem no pop-up de pendentes.</p>
+      </div>
+    </div>
+  </div>
 </div>
 </div><!-- /fixed-head -->
 
@@ -858,12 +918,54 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
       <div id="horas-summary"></div>
     </div>
   </div>
+  <!-- ===== VISTA: LEVANTAMENTOS ===== -->
+  <div id="vista-levantamentos" style="display:none">
+    <section class="widget">
+      <header class="w-head"><h3>Lista de levantamentos</h3></header>
+      <div class="w-body">
+        <div class="table-header">
+          <span></span>
+          <div class="table-filters">
+            <input id="levPesquisa" type="search" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
+            <select id="levFiltroEstado" class="form-input filter-select" style="max-width:190px"></select>
+            <select id="levFiltroTecnico" class="form-input filter-select"></select>
+            <button class="btn btn-sm" onclick="limparLevFiltros()">Limpar</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th onclick="ordenarLev('data')">Data</th>
+              <th onclick="ordenarLev('tecnico')">Técnico</th>
+              <th onclick="ordenarLev('obra')">Obra / cliente</th>
+              <th>Levantamento</th>
+              <th>Ficheiros</th>
+              <th onclick="ordenarLev('estado')">Estado</th>
+              <th style="text-align:right">Ações</th>
+            </tr></thead>
+            <tbody id="levLista"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span class="page-info" id="levPageInfo"></span>
+          <div class="page-controls">
+            <button class="btn btn-sm" id="levPrev" onclick="mudarLevPagina(-1)">Anterior</button>
+            <button class="btn btn-sm" id="levNext" onclick="mudarLevPagina(1)">Próxima</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <!-- ===== VISTA: NOTAS ===== -->
+  <div id="vista-notas" style="display:none">
+    <div id="notasGrid" class="notas-grid"></div>
+  </div>
 </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /app-shell -->
 
 <!-- FAB (mobile quick add) -->
-<button class="fab" onclick="abrirModalNova()" aria-label="Nova Tarefa" title="Nova Tarefa">Nova</button>
+<button class="fab" onclick="acaoNovo()" aria-label="Nova Tarefa" title="Nova Tarefa">Nova</button>
 
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
@@ -956,6 +1058,107 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
       <button class="btn" onclick="fecharModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarTarefa()">Guardar</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL NOTA -->
+<div class="modal-overlay" id="modalNota">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="notaModalTitle">Nova nota</div></div>
+    <div class="modal-body">
+      <input type="hidden" id="notaEditId" value="">
+      <div class="form-group" id="ngrp-texto">
+        <label class="form-label">Nota *</label>
+        <textarea id="notaTexto" class="form-input" style="min-height:110px" placeholder="O que é preciso lembrar?"></textarea>
+        <div class="form-error">Campo obrigatório</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Lembrar em (opcional)</label>
+          <input id="notaLemb" type="date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cor</label>
+          <div class="cores" id="notaCores"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="fecharNota()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNota()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- POP-UP PENDENTES -->
+<div class="modal-overlay" id="modalLembretes" style="z-index:1100">
+  <div class="modal modal-lg">
+    <div class="modal-header"><div class="modal-title">Pendentes por resolver</div></div>
+    <div class="modal-body" id="lembBody"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="fecharLembretes();mudarVista('notas')">Ver notas</button>
+      <button class="btn btn-primary" onclick="fecharLembretes()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LEVANTAMENTO -->
+<div class="modal-overlay" id="modalLev">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="levModalTitle">Novo levantamento</div></div>
+    <div class="modal-body">
+      <input type="hidden" id="levEditIndex" value="-1">
+      <div class="form-row">
+        <div class="form-group" id="lgrp-tecnico">
+          <label class="form-label">Técnico *</label>
+          <input id="levTecnico" type="text" placeholder="Nome do técnico" class="form-input" list="tecnicosList">
+          <div class="form-error">Campo obrigatório</div>
+        </div>
+        <div class="form-group" id="lgrp-data">
+          <label class="form-label">Data *</label>
+          <input id="levData" type="date" class="form-input">
+          <div class="form-error">Campo obrigatório</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" id="lgrp-obra">
+          <label class="form-label">Obra / cliente *</label>
+          <input id="levObra" type="text" placeholder="Obra ou cliente" class="form-input" list="clientesList">
+          <div class="form-error">Campo obrigatório</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select id="levEstado" class="form-input"></select>
+        </div>
+      </div>
+      <div class="form-group" id="lgrp-texto">
+        <label class="form-label">Levantamento *</label>
+        <textarea id="levTexto" placeholder="Material e equipamento necessário, quantidades, referências..." class="form-input" style="min-height:110px"></textarea>
+        <div class="form-error">Campo obrigatório</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea id="levObs" placeholder="Notas adicionais..." class="form-input"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ficheiros (PDF ou Word)</label>
+        <div style="font-size:11px;color:var(--text-faint);margin-bottom:6px">Até 5 ficheiros, 3 MB cada.</div>
+        <label class="btn btn-sm">Adicionar ficheiros<input type="file" id="levInputFich" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple style="display:none" onchange="selecionarFicheirosLev(event)"></label>
+        <div id="levFichLista" class="file-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="fecharLev()">Cancelar</button>
+      <button class="btn btn-primary" id="levBtnGuardar" onclick="guardarLev()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalLevDetalhe">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Detalhe do levantamento</div></div>
+    <div class="modal-body" id="levDetalheBody"></div>
+    <div class="modal-footer"><button class="btn" onclick="fecharLevDetalhe()">Fechar</button></div>
   </div>
 </div>
 
@@ -1131,6 +1334,8 @@ window.addEventListener('fbready', async function(e){
   aplicarPermissoesUI();
   await migrarDadosAntigosSeNecessario();
   escutarTarefasEmTempoReal();
+  escutarLevantamentos();
+  escutarNotas();
 });
 
 window.addEventListener('pywebviewready', function(){
@@ -1226,13 +1431,14 @@ atualizarDataTopbar();
 // NAVIGATION
 // ============================================================
 function mudarVista(vista) {
-  ['tarefas','tecnicos','horas'].forEach(v => {
+  ['tarefas','tecnicos','horas','levantamentos','notas'].forEach(v => {
     document.getElementById('vista-'+v).style.display = v===vista ? '' : 'none';
     document.getElementById('pill-'+v).classList.toggle('active', v===vista);
   });
-  vistaAtual = vista; const cp=document.getElementById('crumbPage'); if(cp) cp.textContent={tarefas:'Painel',tecnicos:'Técnicos',horas:'Horas'}[vista];
+  vistaAtual = vista; const cp=document.getElementById('crumbPage'); if(cp) cp.textContent={tarefas:'Painel',tecnicos:'Técnicos',horas:'Horas',levantamentos:'Levantamentos',notas:'Notas'}[vista];
   if (vista==='horas') renderizarHoras();
   if (vista==='tecnicos') renderizarTecnicos();
+  atualizarCabecalho(vista);
 }
 
 // ============================================================
@@ -2122,13 +2328,13 @@ document.getElementById('filtroDataFim').addEventListener('change',()=>{pagina=1
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)fecharModal();});
 document.getElementById('modalDetalheOverlay').addEventListener('click',function(e){if(e.target===this)fecharDetalhe();});
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){fecharModal();fecharDetalhe();}
+  if(e.key==='Escape'){fecharModal();fecharDetalhe();fecharLev();fecharLevDetalhe();fecharNota();fecharLembretes();}
   const noModalAberto = !document.getElementById('modalOverlay').classList.contains('active') &&
                          !document.getElementById('modalDetalheOverlay').classList.contains('active');
   const dentroDeCampo = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
-  if(noModalAberto && !dentroDeCampo){
-    if(e.key==='n' || e.key==='N'){ e.preventDefault(); abrirModalNova(); }
-    if(e.key==='/'){ e.preventDefault(); document.getElementById('pesquisa').focus(); }
+  if(noModalAberto && !dentroDeCampo && !document.querySelector('.modal-overlay.active')){
+    if(e.key==='n' || e.key==='N'){ e.preventDefault(); acaoNovo(); }
+    if(e.key==='/'){ e.preventDefault(); document.getElementById(vistaAtual==='levantamentos'?'levPesquisa':'pesquisa').focus(); }
   }
 });
 
@@ -2152,6 +2358,378 @@ function esc(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+
+// ============================================================
+// LEVANTAMENTOS
+// Coleção 'levantamentos' (dados) + 'levantamentos_ficheiros'
+// (conteúdo dos PDF/DOCX em partes base64, sem Firebase Storage,
+// no mesmo espírito das fotos das tarefas).
+// Qualquer utilizador autenticado cria; só o admin edita/apaga.
+// ============================================================
+const LEV_ESTADOS = ['Pendente','Em cotação','Pendente fornecimento','Recebido','Entregue','Cancelado'];
+const LEV_BADGE = {'Pendente':'badge-pending','Em cotação':'badge-cot','Pendente fornecimento':'badge-forn','Recebido':'badge-recv','Entregue':'badge-entr','Cancelado':'badge-canc'};
+const LEV_MAX_FICH = 5, LEV_MAX_BYTES = 3*1024*1024, LEV_PARTE = 700000; // 700000 é múltiplo de 4: cada parte descodifica sozinha
+const MIME_FICH = {pdf:'application/pdf', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
+let levantamentos = [], levOrd = {campo:'data',dir:'desc'}, levPag = 1;
+let levNovos = [], levExistentes = [], levRemovidos = [], unsubLev = null;
+
+function badgeLev(e){ return `<span class="badge ${LEV_BADGE[e]||''}">${esc(e||'-')}</span>`; }
+function novoId(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(16).slice(2); }
+function extFich(n){ return (n.split('.').pop()||'').toLowerCase(); }
+function tamFich(b){ return b>=1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(b/1024))+' KB'; }
+
+function acaoNovo(){ if(vistaAtual==='levantamentos') abrirLevNovo(); else if(vistaAtual==='notas') abrirNotaNova(); else abrirModalNova(); }
+function atualizarCabecalho(v){
+  const lev = v==='levantamentos';
+  const nt = v==='notas';
+  document.getElementById('headTarefas').style.display = (lev||nt) ? 'none' : '';
+  document.getElementById('headLev').style.display = lev ? '' : 'none';
+  document.getElementById('headNotas').style.display = nt ? '' : 'none';
+  document.getElementById('btnNovoTopo').textContent = lev ? 'Novo levantamento' : nt ? 'Nova nota' : 'Nova tarefa';
+  document.querySelector('.fab').textContent = lev ? 'Novo' : 'Nova';
+  if(lev) renderizarLevantamentos();
+  if(nt) renderizarNotas();
+}
+
+function escutarLevantamentos(){
+  if(unsubLev) unsubLev();
+  unsubLev = window.FB.onSnapshot(window.FB.collection(window.FB.db,'levantamentos'), snap=>{
+    levantamentos = [];
+    snap.forEach(d=>levantamentos.push({...d.data(), id:d.id}));
+    renderizarLevantamentos();
+  }, e=>{ console.error(e); toast('Não foi possível sincronizar os levantamentos.','error'); });
+}
+
+function renderizarLevStats(){
+  const c = e=>levantamentos.filter(l=>l.estado===e).length;
+  const itens = [['Total',levantamentos.length,'blue',''],['Pendentes',c('Pendente'),'amber','Pendente'],
+    ['Pend. fornecimento',c('Pendente fornecimento'),'red','Pendente fornecimento'],
+    ['Recebidos',c('Recebido'),'teal','Recebido'],['Entregues',c('Entregue'),'green','Entregue']];
+  document.getElementById('levStats').innerHTML = itens.map(([l,v,cor,est])=>
+    `<div class="stat stat-btn c-${cor}" onclick="filtrarLev('${est}')"><div class="stat-label">${l}</div><div class="stat-value ${cor}">${v}</div></div>`).join('');
+}
+function filtrarLev(e){ document.getElementById('levFiltroEstado').value=e; levPag=1; renderizarLevantamentos(); }
+
+function levFiltrados(){
+  const q = document.getElementById('levPesquisa').value.toLowerCase().trim();
+  const fe = document.getElementById('levFiltroEstado').value, ft = document.getElementById('levFiltroTecnico').value;
+  const l = levantamentos.filter(x=>(!fe||x.estado===fe)&&(!ft||x.tecnico===ft)&&(!q||
+    [x.tecnico,x.obra,x.levantamento,x.observacoes].concat((x.ficheiros||[]).map(f=>f.nome)).some(v=>v&&v.toLowerCase().includes(q))));
+  l.sort((a,b)=>{ const va=(a[levOrd.campo]||'').toLowerCase(), vb=(b[levOrd.campo]||'').toLowerCase();
+    return va<vb ? (levOrd.dir==='asc'?-1:1) : va>vb ? (levOrd.dir==='asc'?1:-1) : 0; });
+  return l;
+}
+function ordenarLev(c){ if(levOrd.campo===c) levOrd.dir=levOrd.dir==='asc'?'desc':'asc'; else levOrd={campo:c,dir:'asc'}; levPag=1; renderizarLevantamentos(); }
+function mudarLevPagina(d){ levPag+=d; renderizarLevantamentos(); }
+function limparLevFiltros(){ ['levPesquisa','levFiltroEstado','levFiltroTecnico'].forEach(id=>document.getElementById(id).value=''); levPag=1; renderizarLevantamentos(); }
+
+function renderizarLevantamentos(){
+  atualizarBadgeLemb();
+  renderizarLevStats();
+  const se=document.getElementById('levFiltroEstado'), st=document.getElementById('levFiltroTecnico');
+  const ve=se.value, vt=st.value;
+  se.innerHTML = '<option value="">Todos os estados</option>'+LEV_ESTADOS.map(e=>`<option value="${esc(e)}"${e===ve?' selected':''}>${esc(e)}</option>`).join('');
+  const tecs=[...new Set(levantamentos.map(l=>l.tecnico).filter(Boolean))].sort();
+  st.innerHTML = '<option value="">Todos os técnicos</option>'+tecs.map(t=>`<option value="${esc(t)}"${t===vt?' selected':''}>${esc(t)}</option>`).join('');
+
+  const lista=levFiltrados(), totalPag=Math.ceil(lista.length/POR_PAGINA);
+  if(levPag>totalPag) levPag=Math.max(1,totalPag);
+  const ini=(levPag-1)*POR_PAGINA, pag=lista.slice(ini,ini+POR_PAGINA);
+  document.getElementById('levLista').innerHTML = pag.length ? pag.map(l=>{
+    const i=levantamentos.indexOf(l), n=(l.ficheiros||[]).length;
+    return `<tr>
+      <td data-label="Data">${formatarData(l.data)}</td>
+      <td class="td-techname" data-label="Técnico">${esc(l.tecnico)}</td>
+      <td data-label="Obra / cliente">${esc(l.obra)}</td>
+      <td data-label="Levantamento"><span class="lev-txt" title="${esc(l.levantamento)}">${esc(l.levantamento)}</span></td>
+      <td data-label="Ficheiros">${n?n+' ficheiro'+(n>1?'s':''):'-'}</td>
+      <td data-label="Estado">${badgeLev(l.estado)}</td>
+      <td class="td-actions-cell"><div class="td-actions">
+        <button class="btn btn-sm" onclick="verLev(${i})">Ver</button>
+        <button class="btn btn-edit btn-sm" onclick="editarLev(${i})">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="removerLev(${i})">Remover</button>
+      </div></td></tr>`;
+  }).join('') : '<tr><td colspan="7" style="padding:0"><div class="empty-state"><div class="empty-title">Sem levantamentos</div><div class="empty-sub">Use "Novo levantamento" para registar o primeiro, ou ajuste os filtros.</div></div></td></tr>';
+  document.getElementById('levPageInfo').textContent = lista.length ? `${ini+1}–${Math.min(ini+POR_PAGINA,lista.length)} de ${lista.length} registos` : '0 registos';
+  document.getElementById('levPrev').disabled = levPag<=1;
+  document.getElementById('levNext').disabled = levPag>=totalPag;
+}
+
+// ---------- formulário ----------
+function abrirLevNovo(){
+  document.getElementById('levEditIndex').value=-1;
+  document.getElementById('levModalTitle').textContent='Novo levantamento';
+  ['levTecnico','levObra','levTexto','levObs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('levData').value=hoje();
+  document.getElementById('levEstado').innerHTML=LEV_ESTADOS.map(e=>`<option>${esc(e)}</option>`).join('');
+  levNovos=[]; levExistentes=[]; levRemovidos=[]; renderLevFich(); limparErrosLev();
+  document.getElementById('modalLev').classList.add('active');
+  setTimeout(()=>document.getElementById('levTecnico').focus(),80);
+}
+function editarLev(i){
+  if(!souAdmin){ toast('Apenas o administrador pode editar levantamentos.','error'); return; }
+  abrirLevNovo();
+  const l=levantamentos[i];
+  document.getElementById('levEditIndex').value=i;
+  document.getElementById('levModalTitle').textContent='Editar levantamento';
+  document.getElementById('levTecnico').value=l.tecnico||'';
+  document.getElementById('levData').value=l.data||'';
+  document.getElementById('levObra').value=l.obra||'';
+  document.getElementById('levEstado').value=l.estado||'Pendente';
+  document.getElementById('levTexto').value=l.levantamento||'';
+  document.getElementById('levObs').value=l.observacoes||'';
+  levExistentes=[...(l.ficheiros||[])]; renderLevFich();
+}
+function fecharLev(){ document.getElementById('modalLev').classList.remove('active'); }
+function fecharLevDetalhe(){ document.getElementById('modalLevDetalhe').classList.remove('active'); }
+function limparErrosLev(){ ['lgrp-tecnico','lgrp-data','lgrp-obra','lgrp-texto'].forEach(id=>document.getElementById(id).classList.remove('has-error')); }
+function validarLev(){
+  let ok=true;
+  [['levTecnico','lgrp-tecnico'],['levData','lgrp-data'],['levObra','lgrp-obra'],['levTexto','lgrp-texto']].forEach(([id,g])=>{
+    const vazio=!document.getElementById(id).value.trim();
+    document.getElementById(g).classList.toggle('has-error',vazio); if(vazio) ok=false;
+  });
+  return ok;
+}
+
+function selecionarFicheirosLev(e){
+  const fs=Array.from(e.target.files||[]); e.target.value='';
+  for(const f of fs){
+    if(!MIME_FICH[extFich(f.name)]){ toast(`"${f.name}": só são aceites PDF e DOCX.`,'error'); continue; }
+    if(f.size>LEV_MAX_BYTES){ toast(`"${f.name}" excede 3 MB.`,'error'); continue; }
+    if(levExistentes.length+levNovos.length>=LEV_MAX_FICH){ toast(`Máximo de ${LEV_MAX_FICH} ficheiros por levantamento.`,'error'); break; }
+    levNovos.push(f);
+  }
+  renderLevFich();
+}
+function itemFich(nome,tam,acao){
+  const ext=extFich(nome);
+  return `<div class="file-item"><span class="file-ext ${ext}">${esc(ext.toUpperCase())}</span><span class="file-name" title="${esc(nome)}">${esc(nome)}</span><span class="file-size">${tamFich(tam)}</span>${acao}</div>`;
+}
+function renderLevFich(){
+  document.getElementById('levFichLista').innerHTML =
+    levExistentes.map((f,i)=>itemFich(f.nome,f.tamanho,`<button type="button" class="file-x" onclick="levRemoverExistente(${i})" title="Remover">Remover</button>`)).join('')+
+    levNovos.map((f,i)=>itemFich(f.name,f.size,`<button type="button" class="file-x" onclick="levNovos.splice(${i},1);renderLevFich()" title="Retirar">Retirar</button>`)).join('');
+}
+function levRemoverExistente(i){ levRemovidos.push(levExistentes[i]); levExistentes.splice(i,1); renderLevFich(); }
+
+// ---------- ficheiros (partes base64) ----------
+function lerBase64(f){
+  return new Promise((ok,err)=>{ const r=new FileReader(); r.onload=()=>ok(String(r.result).split(',')[1]||''); r.onerror=err; r.readAsDataURL(f); });
+}
+async function enviarFicheiroLev(f){
+  const b64=await lerBase64(f), id=novoId(), partes=Math.max(1,Math.ceil(b64.length/LEV_PARTE));
+  for(let i=0;i<partes;i++){
+    await window.FB.setDoc(window.FB.doc(window.FB.db,'levantamentos_ficheiros',id+'_'+i),
+      {fid:id, parte:i, dados:b64.slice(i*LEV_PARTE,(i+1)*LEV_PARTE), criadoPor:uidAtual});
+  }
+  return {id, nome:f.name, tamanho:f.size, ext:extFich(f.name), partes};
+}
+async function apagarFicheirosLev(metas){
+  for(const m of metas) for(let i=0;i<m.partes;i++)
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db,'levantamentos_ficheiros',m.id+'_'+i));
+}
+async function baixarFicheiroLev(levId,fid){
+  const l=levantamentos.find(x=>x.id===levId), m=l&&(l.ficheiros||[]).find(f=>f.id===fid);
+  if(!m) return;
+  toast('A preparar o ficheiro...','info');
+  try{
+    const blocos=[];
+    for(let i=0;i<m.partes;i++){
+      const sn=await window.FB.getDoc(window.FB.doc(window.FB.db,'levantamentos_ficheiros',fid+'_'+i));
+      if(!sn.exists()) throw new Error('parte '+i+' em falta');
+      const bin=atob(sn.data().dados), u=new Uint8Array(bin.length);
+      for(let k=0;k<bin.length;k++) u[k]=bin.charCodeAt(k);
+      blocos.push(u);
+    }
+    const url=URL.createObjectURL(new Blob(blocos,{type:MIME_FICH[m.ext]||'application/octet-stream'}));
+    const a=document.createElement('a'); a.href=url; a.download=m.nome; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  }catch(e){ console.error(e); toast('Não foi possível descarregar o ficheiro.','error'); }
+}
+
+// ---------- guardar / ver / remover ----------
+async function guardarLev(){
+  if(!validarLev()){ toast('Preencha os campos obrigatórios.','error'); return; }
+  if(!window.FB||!uidAtual){ toast('Sem ligação à nuvem — tenta novamente.','error'); return; }
+  const i=parseInt(document.getElementById('levEditIndex').value);
+  if(i>=0 && !souAdmin){ toast('Apenas o administrador pode editar levantamentos.','error'); return; }
+  const dados={
+    tecnico:document.getElementById('levTecnico').value.trim(), data:document.getElementById('levData').value,
+    obra:document.getElementById('levObra').value.trim(), estado:document.getElementById('levEstado').value,
+    levantamento:document.getElementById('levTexto').value.trim(), observacoes:document.getElementById('levObs').value.trim()
+  };
+  const btn=document.getElementById('levBtnGuardar'); btn.disabled=true;
+  const enviados=[];
+  try{
+    for(let n=0;n<levNovos.length;n++){ btn.textContent=`A enviar ficheiro ${n+1}/${levNovos.length}...`; enviados.push(await enviarFicheiroLev(levNovos[n])); }
+    btn.textContent='A guardar...';
+    const ficheiros=levExistentes.concat(enviados);
+    if(i>=0){
+      await window.FB.updateDoc(window.FB.doc(window.FB.db,'levantamentos',levantamentos[i].id),
+        {...dados, ficheiros, atualizadoEm:window.FB.serverTimestamp(), atualizadoPor:emailAtual});
+    } else {
+      const id=novoId();
+      await window.FB.setDoc(window.FB.doc(window.FB.db,'levantamentos',id),
+        {...dados, ficheiros, id, criadoPor:uidAtual, criadoPorEmail:emailAtual, criadoEm:window.FB.serverTimestamp()});
+    }
+    await apagarFicheirosLev(levRemovidos).catch(e=>console.warn(e));
+    toast(i>=0?'Levantamento atualizado.':'Levantamento registado.','success');
+    fecharLev(); levPag=1;
+  }catch(e){
+    console.error(e);
+    await apagarFicheirosLev(enviados).catch(()=>{});
+    toast('Não foi possível guardar o levantamento.','error');
+  }finally{ btn.disabled=false; btn.textContent='Guardar'; }
+}
+
+function verLev(i){
+  const l=levantamentos[i];
+  const linha=(r,v)=>`<div class="detail-row"><div class="detail-label">${r}</div><div class="detail-value">${v}</div></div>`;
+  const estado = souAdmin
+    ? `<select class="form-input" style="max-width:240px" onchange="mudarEstadoLev('${l.id}',this.value)">${LEV_ESTADOS.map(e=>`<option${e===l.estado?' selected':''}>${esc(e)}</option>`).join('')}</select>`
+    : badgeLev(l.estado);
+  const fich=(l.ficheiros||[]).map(f=>itemFich(f.nome,f.tamanho,`<button class="btn btn-sm" onclick="baixarFicheiroLev('${l.id}','${f.id}')">Descarregar</button>`)).join('');
+  document.getElementById('levDetalheBody').innerHTML =
+    linha('Técnico',esc(l.tecnico))+linha('Data',formatarData(l.data))+linha('Obra / cliente',esc(l.obra))+linha('Estado',estado)+
+    linha('Levantamento',`<div style="white-space:pre-wrap">${esc(l.levantamento)}</div>`)+
+    linha('Observações',`<div style="white-space:pre-wrap">${esc(l.observacoes||'-')}</div>`)+
+    linha('Ficheiros',fich?`<div class="file-list" style="margin:0;width:100%">${fich}</div>`:'-');
+  document.getElementById('modalLevDetalhe').classList.add('active');
+}
+async function mudarEstadoLev(id,estado){
+  try{
+    await window.FB.updateDoc(window.FB.doc(window.FB.db,'levantamentos',id),{estado,atualizadoEm:window.FB.serverTimestamp(),atualizadoPor:emailAtual});
+    toast('Estado atualizado.','success');
+  }catch(e){ console.error(e); toast('Não foi possível alterar o estado.','error'); }
+}
+async function removerLev(i){
+  if(!souAdmin){ toast('Apenas o administrador pode remover levantamentos.','error'); return; }
+  const l=levantamentos[i]; if(!l||!confirm('Remover este levantamento e os seus ficheiros?')) return;
+  try{
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db,'levantamentos',l.id));
+    await apagarFicheirosLev(l.ficheiros||[]).catch(e=>console.warn(e));
+    toast('Levantamento removido.','info');
+  }catch(e){ console.error(e); toast('Não foi possível remover o levantamento.','error'); }
+}
+
+['levPesquisa','levFiltroEstado','levFiltroTecnico'].forEach(id=>
+  document.getElementById(id).addEventListener(id==='levPesquisa'?'input':'change',()=>{levPag=1;renderizarLevantamentos();}));
+document.getElementById('modalLev').addEventListener('click',function(e){if(e.target===this)fecharLev();});
+document.getElementById('modalLevDetalhe').addEventListener('click',function(e){if(e.target===this)fecharLevDetalhe();});
+
+// ============================================================
+// NOTAS (sticky notes) E POP-UP DE PENDENTES
+// Coleção 'notas', partilhada pela equipa. Cada nota pode ter uma
+// data de lembrete. O pop-up junta tarefas por concluir,
+// levantamentos em aberto e notas por fazer.
+// ============================================================
+const LEMB_INTERVALO_MIN = 30; // o pop-up volta a aparecer a cada N minutos
+const NOTA_CORES = {amarelo:'#fbe99a', verde:'#d3e8b8', azul:'#c3dcef', rosa:'#f3cad3'};
+let notas = [], unsubNotas = null, lembIniciado = false, notaCor = 'amarelo';
+
+function podeNota(n){ return souAdmin || n.criadoPor===uidAtual; }
+function escutarNotas(){
+  if(unsubNotas) unsubNotas();
+  unsubNotas = window.FB.onSnapshot(window.FB.collection(window.FB.db,'notas'), snap=>{
+    notas=[]; snap.forEach(d=>notas.push({...d.data(), id:d.id}));
+    renderizarNotas(); atualizarBadgeLemb();
+  }, e=>{ console.error(e); toast('Não foi possível sincronizar as notas.','error'); });
+  if(!lembIniciado){
+    lembIniciado = true;
+    setTimeout(()=>abrirLembretes(true), 4000);
+    setInterval(()=>abrirLembretes(true), LEMB_INTERVALO_MIN*60000);
+  }
+}
+function estadoLemb(d){ if(!d) return ''; const h=hoje(); return d<h ? 'atraso' : d===h ? 'hoje' : 'futuro'; }
+function textoLemb(d){ const e=estadoLemb(d); return e==='atraso' ? 'Atrasado desde '+formatarData(d) : e==='hoje' ? 'Lembrar hoje' : 'Lembrar em '+formatarData(d); }
+
+function renderizarNotas(){
+  const g=document.getElementById('notasGrid'); if(!g) return;
+  const ms=n=>n.criadoEm&&n.criadoEm.toMillis?n.criadoEm.toMillis():0;
+  const l=[...notas].sort((a,b)=> (a.feita-b.feita) || ((a.lembrete||'9999')<(b.lembrete||'9999')?-1:(a.lembrete||'9999')>(b.lembrete||'9999')?1:0) || (ms(b)-ms(a)));
+  g.innerHTML = l.length ? l.map(n=>`<div class="nota${n.feita?' feita':''}" style="background:${NOTA_CORES[n.cor]||NOTA_CORES.amarelo}">
+    <div class="nota-txt">${esc(n.texto)}</div>
+    ${n.lembrete&&!n.feita?`<div class="nota-lemb ${estadoLemb(n.lembrete)==='atraso'?'atraso':''}">${textoLemb(n.lembrete)}</div>`:''}
+    <div class="nota-meta">${esc((n.criadoPorEmail||'').split('@')[0])}</div>
+    ${podeNota(n)?`<div class="nota-acoes"><button onclick="alternarNota('${n.id}')">${n.feita?'Reabrir':'Feita'}</button><button onclick="editarNota('${n.id}')">Editar</button><button onclick="removerNota('${n.id}')">Remover</button></div>`:''}
+  </div>`).join('') : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">Sem notas</div><div class="empty-sub">Use "Nova nota" para deixar um lembrete à equipa.</div></div>';
+}
+
+function abrirNotaNova(){
+  document.getElementById('notaEditId').value='';
+  document.getElementById('notaModalTitle').textContent='Nova nota';
+  document.getElementById('notaTexto').value=''; document.getElementById('notaLemb').value='';
+  document.getElementById('ngrp-texto').classList.remove('has-error');
+  escolherCorNota('amarelo');
+  document.getElementById('modalNota').classList.add('active');
+  setTimeout(()=>document.getElementById('notaTexto').focus(),80);
+}
+function editarNota(id){
+  const n=notas.find(x=>x.id===id); if(!n||!podeNota(n)) return;
+  abrirNotaNova();
+  document.getElementById('notaEditId').value=id;
+  document.getElementById('notaModalTitle').textContent='Editar nota';
+  document.getElementById('notaTexto').value=n.texto||''; document.getElementById('notaLemb').value=n.lembrete||'';
+  escolherCorNota(n.cor||'amarelo');
+}
+function fecharNota(){ document.getElementById('modalNota').classList.remove('active'); }
+function escolherCorNota(c){
+  notaCor=c;
+  document.getElementById('notaCores').innerHTML = Object.entries(NOTA_CORES).map(([k,v])=>
+    `<button type="button" class="cor-op${k===c?' sel':''}" style="background:${v}" title="${k}" onclick="escolherCorNota('${k}')"></button>`).join('');
+}
+async function guardarNota(){
+  const texto=document.getElementById('notaTexto').value.trim();
+  document.getElementById('ngrp-texto').classList.toggle('has-error',!texto);
+  if(!texto){ toast('Escreva a nota.','error'); return; }
+  const id=document.getElementById('notaEditId').value;
+  const dados={texto, lembrete:document.getElementById('notaLemb').value, cor:notaCor};
+  try{
+    if(id){
+      await window.FB.updateDoc(window.FB.doc(window.FB.db,'notas',id),{...dados,atualizadoEm:window.FB.serverTimestamp()});
+    } else {
+      const nid=novoId();
+      await window.FB.setDoc(window.FB.doc(window.FB.db,'notas',nid),
+        {...dados, feita:false, id:nid, criadoPor:uidAtual, criadoPorEmail:emailAtual, criadoEm:window.FB.serverTimestamp()});
+    }
+    fecharNota(); toast(id?'Nota atualizada.':'Nota guardada.','success');
+  }catch(e){ console.error(e); toast('Não foi possível guardar a nota.','error'); }
+}
+async function alternarNota(id){
+  const n=notas.find(x=>x.id===id); if(!n||!podeNota(n)) return;
+  try{ await window.FB.updateDoc(window.FB.doc(window.FB.db,'notas',id),{feita:!n.feita}); }
+  catch(e){ console.error(e); toast('Não foi possível atualizar a nota.','error'); }
+}
+async function removerNota(id){
+  const n=notas.find(x=>x.id===id); if(!n||!podeNota(n)||!confirm('Remover esta nota?')) return;
+  try{ await window.FB.deleteDoc(window.FB.doc(window.FB.db,'notas',id)); toast('Nota removida.','info'); }
+  catch(e){ console.error(e); toast('Não foi possível remover a nota.','error'); }
+}
+
+// ---------- pop-up de pendentes ----------
+function pendentesGeral(){
+  const t=tarefas.filter(x=>estadoNorm(x)!=='Concluído');
+  const l=levantamentos.filter(x=>!['Entregue','Cancelado'].includes(x.estado));
+  const n=notas.filter(x=>!x.feita).sort((a,b)=>(a.lembrete||'9999')<(b.lembrete||'9999')?-1:1);
+  return {t,l,n,total:t.length+l.length+n.length};
+}
+function atualizarBadgeLemb(){ const el=document.getElementById('badgeLemb'); if(el) el.textContent=pendentesGeral().total; }
+function fecharLembretes(){ document.getElementById('modalLembretes').classList.remove('active'); }
+function abrirLembretes(auto){
+  const p=pendentesGeral();
+  if(auto && (!p.total || document.querySelector('.modal-overlay.active'))) return;
+  const li=(a,b,x)=>`<li style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)"><div style="min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a}</div><div style="font-size:11.5px;color:var(--text-muted)">${b}</div></div><div>${x}</div></li>`;
+  const sec=(tit,arr,fn)=>arr.length?`<div class="lemb-sec"><h4>${tit} (${arr.length})</h4><ul>${arr.slice(0,6).map(fn).join('')}</ul>${arr.length>6?`<div class="lemb-mais">e mais ${arr.length-6}</div>`:''}</div>`:'';
+  const corpo =
+    sec('Tarefas por concluir',p.t,t=>li(esc(t.tarefa),esc(t.tecnico||'-')+(t.cliente?' · '+esc(t.cliente):''),badgeEstado(estadoNorm(t))))+
+    sec('Levantamentos em aberto',p.l,l=>li(esc(l.levantamento),esc(l.tecnico||'-')+' · '+esc(l.obra||'-'),badgeLev(l.estado)))+
+    sec('Notas e lembretes',p.n,n=>li(esc(n.texto),n.lembrete?textoLemb(n.lembrete):'Sem data',estadoLemb(n.lembrete)==='atraso'?'<span class="badge badge-forn">Atrasado</span>':estadoLemb(n.lembrete)==='hoje'?'<span class="badge badge-pending">Hoje</span>':''));
+  document.getElementById('lembBody').innerHTML = corpo || '<div class="empty-state"><div class="empty-title">Tudo em dia</div><div class="empty-sub">Não há tarefas, levantamentos ou notas por resolver.</div></div>';
+  document.getElementById('modalLembretes').classList.add('active');
+}
+document.getElementById('modalNota').addEventListener('click',function(e){if(e.target===this)fecharNota();});
+document.getElementById('modalLembretes').addEventListener('click',function(e){if(e.target===this)fecharLembretes();});
 
 // ============================================================
 // WIDGETS DO PAINEL
@@ -2227,6 +2805,7 @@ function renderizar(){
   renderizarWidgets();
   if(vistaAtual==='tecnicos') renderizarTecnicos();
   if(vistaAtual==='horas') renderizarHoras();
+  atualizarBadgeLemb();
 }
 
 // Set default dates for horas view
