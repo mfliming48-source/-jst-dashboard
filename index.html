@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="JST Dashboard">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1245,12 +1246,23 @@ function aplicarPermissoesUI() {
   }
 }
 
+// A cache local é só um extra para abrir mais depressa. Com fotos em
+// base64 pode exceder o limite do localStorage (~5 MB); nesse caso
+// ignora-se em silêncio, os dados reais estão no Firestore.
+function cacheLocalTarefas(json) {
+  try {
+    localStorage.setItem('jst_tarefas_v2', json || JSON.stringify(tarefas));
+  } catch (e) {
+    try { localStorage.removeItem('jst_tarefas_v2'); } catch (_) {}
+  }
+}
+
 async function guardarLocal() {
   // Mantido por compatibilidade (cache local + app desktop).
   // A gravação "de verdade" na nuvem é feita por tarefa em
   // guardarTarefa()/removerTarefa() (ver mais abaixo).
   const json = JSON.stringify(tarefas);
-  localStorage.setItem('jst_tarefas_v2', json);
+  cacheLocalTarefas(json);
   if (window.pywebview && window.pywebview.api && window.pywebview.api.guardar_dados) {
     try {
       await window.pywebview.api.guardar_dados(json);
@@ -1319,8 +1331,8 @@ function escutarTarefasEmTempoReal() {
       return tb - ta;
     });
     tarefas = lista;
-    localStorage.setItem('jst_tarefas_v2', JSON.stringify(tarefas));
     renderizar();
+    cacheLocalTarefas();
   }, (e) => {
     console.error('Falha na sincronização em tempo real:', e);
     toast('Não foi possível sincronizar com a nuvem.', 'error');
