@@ -556,6 +556,10 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
 .lemb-sec h4{font-size:13px;font-weight:600;margin-bottom:4px}
 .lemb-sec ul{list-style:none}
 .lemb-mais{font-size:11.5px;color:var(--text-faint);padding-top:4px}
+.nav-alert{margin-left:auto;background:var(--red);color:#fff;border-radius:9px;font:600 10.5px 'DM Sans',sans-serif;padding:1px 6px;min-width:18px;text-align:center}
+.hist{list-style:none;margin:0;padding:0;width:100%;font-size:12.5px}
+.hist li{padding:5px 0;border-bottom:1px solid var(--border)}
+.hist small{display:block;color:var(--text-faint);font-size:11px}
 </style>
 </head>
 <body>
@@ -1349,6 +1353,7 @@ window.addEventListener('fbready', async function(e){
   escutarTarefasEmTempoReal();
   escutarLevantamentos();
   escutarNotas();
+  escutarMods();
 });
 
 window.addEventListener('pywebviewready', function(){
@@ -1444,11 +1449,11 @@ atualizarDataTopbar();
 // NAVIGATION
 // ============================================================
 function mudarVista(vista) {
-  ['tarefas','tecnicos','horas','levantamentos','notas'].forEach(v => {
+  ['tarefas','tecnicos','horas','levantamentos','notas'].concat(Object.keys(MODS)).forEach(v => {
     document.getElementById('vista-'+v).style.display = v===vista ? '' : 'none';
     document.getElementById('pill-'+v).classList.toggle('active', v===vista);
   });
-  vistaAtual = vista; const cp=document.getElementById('crumbPage'); if(cp) cp.textContent={tarefas:'Painel',tecnicos:'Técnicos',horas:'Horas',levantamentos:'Levantamentos',notas:'Notas'}[vista];
+  vistaAtual = vista; const cp=document.getElementById('crumbPage'); if(cp) cp.textContent={tarefas:'Painel',tecnicos:'Técnicos',horas:'Horas',levantamentos:'Levantamentos',notas:'Notas'}[vista] || (MODS[vista]&&MODS[vista].titulo);
   if (vista==='horas') renderizarHoras();
   if (vista==='tecnicos') renderizarTecnicos();
   atualizarCabecalho(vista);
@@ -2347,7 +2352,7 @@ document.addEventListener('keydown',e=>{
   const dentroDeCampo = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
   if(noModalAberto && !dentroDeCampo && !document.querySelector('.modal-overlay.active')){
     if(e.key==='n' || e.key==='N'){ e.preventDefault(); acaoNovo(); }
-    if(e.key==='/'){ e.preventDefault(); document.getElementById(vistaAtual==='levantamentos'?'levPesquisa':'pesquisa').focus(); }
+    if(e.key==='/'){ e.preventDefault(); document.getElementById(vistaAtual==='levantamentos'?'levPesquisa':MODS[vistaAtual]?'q-'+vistaAtual:'pesquisa').focus(); }
   }
 });
 
@@ -2391,17 +2396,19 @@ function novoId(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.
 function extFich(n){ return (n.split('.').pop()||'').toLowerCase(); }
 function tamFich(b){ return b>=1048576 ? (b/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(b/1024))+' KB'; }
 
-function acaoNovo(){ if(vistaAtual==='levantamentos') abrirLevNovo(); else if(vistaAtual==='notas') abrirNotaNova(); else abrirModalNova(); }
+function acaoNovo(){ if(MODS[vistaAtual]) abrirMod(vistaAtual); else if(vistaAtual==='levantamentos') abrirLevNovo(); else if(vistaAtual==='notas') abrirNotaNova(); else abrirModalNova(); }
 function atualizarCabecalho(v){
   const lev = v==='levantamentos';
-  const nt = v==='notas';
-  document.getElementById('headTarefas').style.display = (lev||nt) ? 'none' : '';
+  const nt = v==='notas', md = MODS[v];
+  document.getElementById('headTarefas').style.display = (lev||nt||md) ? 'none' : '';
+  document.getElementById('headMod').style.display = md ? '' : 'none';
   document.getElementById('headLev').style.display = lev ? '' : 'none';
   document.getElementById('headNotas').style.display = nt ? '' : 'none';
-  document.getElementById('btnNovoTopo').textContent = lev ? 'Novo levantamento' : nt ? 'Nova nota' : 'Nova tarefa';
-  document.querySelector('.fab').textContent = lev ? 'Novo' : 'Nova';
+  document.getElementById('btnNovoTopo').textContent = lev ? 'Novo levantamento' : md ? md.novo : nt ? 'Nova nota' : 'Nova tarefa';
+  document.querySelector('.fab').textContent = (lev||md) ? 'Novo' : 'Nova';
   if(lev) renderizarLevantamentos();
   if(nt) renderizarNotas();
+  if(md) renderMod(v);
 }
 
 function escutarLevantamentos(){
@@ -2725,7 +2732,8 @@ function pendentesGeral(){
   const t=tarefas.filter(x=>estadoNorm(x)!=='Concluído');
   const l=levantamentos.filter(x=>!['Entregue','Cancelado'].includes(x.estado));
   const n=notas.filter(x=>!x.feita).sort((a,b)=>(a.lembrete||'9999')<(b.lembrete||'9999')?-1:1);
-  return {t,l,n,total:t.length+l.length+n.length};
+  const x=(typeof MODS==='undefined'?[]:Object.keys(MODS)).filter(k=>MODS[k].aberto).map(k=>({m:MODS[k],arr:MS[k].lista.filter(MODS[k].aberto)}));
+  return {t,l,n,x,total:t.length+l.length+n.length+x.reduce((a,b)=>a+b.arr.length,0)};
 }
 function atualizarBadgeLemb(){ const el=document.getElementById('badgeLemb'); if(el) el.textContent=pendentesGeral().total; }
 function fecharLembretes(){ document.getElementById('modalLembretes').classList.remove('active'); }
@@ -2738,11 +2746,287 @@ function abrirLembretes(auto){
     sec('Tarefas por concluir',p.t,t=>li(esc(t.tarefa),esc(t.tecnico||'-')+(t.cliente?' · '+esc(t.cliente):''),badgeEstado(estadoNorm(t))))+
     sec('Levantamentos em aberto',p.l,l=>li(esc(l.levantamento),esc(l.tecnico||'-')+' · '+esc(l.obra||'-'),badgeLev(l.estado)))+
     sec('Notas e lembretes',p.n,n=>li(esc(n.texto),n.lembrete?textoLemb(n.lembrete):'Sem data',estadoLemb(n.lembrete)==='atraso'?'<span class="badge badge-forn">Atrasado</span>':estadoLemb(n.lembrete)==='hoje'?'<span class="badge badge-pending">Hoje</span>':''));
-  document.getElementById('lembBody').innerHTML = corpo || '<div class="empty-state"><div class="empty-title">Tudo em dia</div><div class="empty-sub">Não há tarefas, levantamentos ou notas por resolver.</div></div>';
+  const corpoX = p.x.map(({m,arr})=>sec(esc(m.pend),arr,y=>{const r=m.lin(y);return li(esc(r[0]),esc(r[1]),badgeMod(visMod(m,y)));})).join('');
+  document.getElementById('lembBody').innerHTML = (corpo+corpoX) || '<div class="empty-state"><div class="empty-title">Tudo em dia</div><div class="empty-sub">Não há tarefas, levantamentos ou notas por resolver.</div></div>';
   document.getElementById('modalLembretes').classList.add('active');
 }
 document.getElementById('modalNota').addEventListener('click',function(e){if(e.target===this)fecharNota();});
 document.getElementById('modalLembretes').addEventListener('click',function(e){if(e.target===this)fecharLembretes();});
+
+// ============================================================
+// MÓDULOS DE GESTÃO TÉCNICA: devoluções, equipamentos técnicos,
+// material emprestado e stock. Mesmo padrão dos levantamentos:
+// qualquer utilizador autenticado regista; só o admin edita/apaga.
+// Fotos comprimidas e guardadas no próprio documento (como nas tarefas).
+// ============================================================
+var BM = {'Por devolver':'badge-pending','Devolvido':'badge-entr','Operacional':'badge-entr','Em manutenção':'badge-cot','Avariado':'badge-forn','Abatido':'badge-canc','Emprestado':'badge-pending','Em atraso':'badge-forn','Stock baixo':'badge-forn','OK':'badge-entr','Manutenção atrasada':'badge-forn','Manutenção próxima':'badge-pending'};
+var CM = {'badge-entr':'green','badge-pending':'amber','badge-forn':'red','badge-cot':'teal','badge-canc':'blue'};
+function maisDias(n){ const d=new Date(); d.setDate(d.getDate()+n); return ymd(d); }
+const _manutOk = x=>x.manutencao&&!['Abatido','Em manutenção','Avariado'].includes(x.estado);
+const manutAtrasada = x=>_manutOk(x)&&x.manutencao<hoje();
+const manutProxima = x=>_manutOk(x)&&x.manutencao>=hoje()&&x.manutencao<=maisDias(7);
+const atrasoDev = x=>x.estado==='Por devolver'&&x.prazo&&x.prazo<hoje();
+const atrasoEmp = x=>x.estado==='Emprestado'&&x.prevista&&x.prevista<hoje();
+var MODS = {
+  devolucoes:{col:'devolucoes',titulo:'Devoluções',novo:'Nova devolução',sing:'devolução',fotos:1,ord:'data',
+    sub:'Material devolvido por obra, com guia relacionada e fotos',
+    estados:['Por devolver','Devolvido'], aberto:x=>x.estado!=='Devolvido', pend:'Devoluções por fazer',
+    visList:['Por devolver','Em atraso','Devolvido'], vis:x=>atrasoDev(x)?'Em atraso':x.estado, alerta:atrasoDev,
+    lin:x=>[`${x.item} × ${x.quantidade}`,`${x.obra||'-'} · Guia ${x.guia||'-'}`],
+    campos:[{k:'data',l:'Data',t:'date',req:1,c:1},{k:'obra',l:'Obra / cliente',req:1,c:1,list:'clientesList'},
+      {k:'item',l:'Item',req:1,c:1},{k:'quantidade',l:'Quantidade',t:'number',req:1,c:1},
+      {k:'guia',l:'Guia relacionada',c:1},{k:'prazo',l:'Devolver até',t:'date'},{k:'tecnico',l:'Técnico',list:'tecnicosList'},
+      {k:'estado',l:'Estado',t:'select'},{k:'observacoes',l:'Observações',t:'textarea'}]},
+  equipamentos:{col:'equipamentos',titulo:'Equipamentos técnicos',novo:'Novo equipamento',sing:'equipamento',fotos:1,ord:'nome',
+    sub:'Ferramentas e equipamentos da equipa: responsável, localização e manutenção',
+    estados:['Operacional','Em manutenção','Avariado','Abatido'], pend:'Equipamentos com alerta',
+    visList:['Operacional','Manutenção próxima','Manutenção atrasada','Em manutenção','Avariado','Abatido'],
+    vis:x=>manutAtrasada(x)?'Manutenção atrasada':manutProxima(x)?'Manutenção próxima':x.estado,
+    alerta:x=>x.estado==='Avariado'||manutAtrasada(x)||manutProxima(x), aberto:x=>x.estado==='Avariado'||manutAtrasada(x)||manutProxima(x),
+    lin:x=>[x.nome,(x.responsavel||x.local||'-')+(x.manutencao?' · manutenção '+formatarData(x.manutencao):'')],
+    campos:[{k:'nome',l:'Equipamento',req:1,c:1},{k:'codigo',l:'Código / nº de série',c:1},{k:'categoria',l:'Categoria',c:1},
+      {k:'responsavel',l:'Responsável',c:1,list:'tecnicosList'},{k:'local',l:'Localização',c:1},
+      {k:'aquisicao',l:'Data de aquisição',t:'date'},{k:'manutencao',l:'Próxima manutenção',t:'date',c:1},
+      {k:'estado',l:'Estado',t:'select'},{k:'observacoes',l:'Observações',t:'textarea'}]},
+  emprestimos:{col:'emprestimos',titulo:'Material emprestado',novo:'Novo empréstimo',sing:'empréstimo',fotos:1,ord:'data',
+    sub:'Material que saiu para técnicos, obras ou clientes e ainda deve voltar',
+    estados:['Emprestado','Devolvido'], visList:['Emprestado','Em atraso','Devolvido'],
+    vis:x=>atrasoEmp(x)?'Em atraso':x.estado, alerta:atrasoEmp,
+    fim:{estado:'Devolvido',campo:'devolvidoEm'}, aberto:x=>x.estado!=='Devolvido', pend:'Material por devolver',
+    lin:x=>[`${x.material} × ${x.quantidade}`,`${x.tecnico||'-'} · ${x.obra||'-'}`],
+    campos:[{k:'data',l:'Data de saída',t:'date',req:1,c:1},{k:'material',l:'Material',req:1,c:1},
+      {k:'quantidade',l:'Quantidade',t:'number',req:1,c:1},{k:'tecnico',l:'Levado por',req:1,c:1,list:'tecnicosList'},
+      {k:'obra',l:'Obra / cliente',c:1,list:'clientesList'},{k:'prevista',l:'Devolução prevista',t:'date',c:1},
+      {k:'devolvidoEm',l:'Devolvido em',t:'date'},{k:'estado',l:'Estado',t:'select'},{k:'observacoes',l:'Observações',t:'textarea'}]},
+  stock:{col:'stock',titulo:'Stock de material',novo:'Novo artigo',sing:'artigo',ord:'item',
+    sub:'Material em armazém, com stock mínimo e alerta de reposição',
+    visList:['Stock baixo','OK'], vis:x=>Number(x.quantidade)<=Number(x.minimo||0)?'Stock baixo':'OK',
+    aberto:x=>Number(x.quantidade)<=Number(x.minimo||0), alerta:x=>Number(x.quantidade)<=Number(x.minimo||0), pend:'Stock abaixo do mínimo',
+    lin:x=>[x.item,`${x.quantidade} em stock · mínimo ${x.minimo||0}`],
+    campos:[{k:'item',l:'Artigo',req:1,c:1},{k:'categoria',l:'Categoria',c:1},{k:'quantidade',l:'Quantidade',t:'number',req:1,c:1},
+      {k:'minimo',l:'Stock mínimo',t:'number',c:1},{k:'unidade',l:'Unidade (un, m, cx...)'},{k:'local',l:'Localização',c:1},
+      {k:'observacoes',l:'Observações',t:'textarea'}]}
+};
+var MS = {};
+Object.keys(MODS).forEach(k=>{ const o=MODS[k].ord; MS[k]={lista:[],pag:1,ord:{campo:o,dir:o==='data'?'desc':'asc'},novas:[],exist:[],unsub:null}; });
+let modAtual=null, modIdx=-1;
+const gm = id=>document.getElementById(id);
+const visMod = (m,x)=>m.vis?m.vis(x):x.estado;
+const badgeMod = e=>`<span class="badge ${BM[e]||''}">${esc(e||'-')}</span>`;
+const valMod = (c,x)=>{ const v=x[c.k]; return v===undefined||v===null||v===''?'-':c.t==='date'?formatarData(v):esc(v); };
+
+function montarMods(){
+  const ico={devolucoes:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/>',equipamentos:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
+    emprestimos:'<path d="M7 7h10l-3-3M17 17H7l3 3"/>',stock:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/>'};
+  let ant=gm('pill-levantamentos'); const fim=gm('vista-notas');
+  const h=document.createElement('div'); h.id='headMod'; h.style.display='none';
+  h.innerHTML='<div class="toolbar"><div><h1 id="hmTitulo"></h1><p class="hide-mobile" id="hmSub"></p></div><div class="header-actions"><button class="btn btn-excel" id="hmExcel">Exportar Excel</button></div></div><div class="stats" id="hmStats"></div>';
+  gm('headNotas').after(h);
+  gm('headLev').querySelector('.toolbar').insertAdjacentHTML('beforeend','<div class="header-actions"><button class="btn btn-excel" onclick="exportarLev()">Exportar Excel</button></div>');
+  Object.entries(MODS).forEach(([k,m])=>{
+    const b=document.createElement('button'); b.className='nav-item'; b.id='pill-'+k; b.onclick=()=>mudarVista(k);
+    b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ico[k]}</svg>${m.titulo}`;
+    ant.after(b); ant=b;
+    const v=document.createElement('div'); v.id='vista-'+k; v.style.display='none';
+    v.innerHTML=`<section class="widget"><header class="w-head"><h3>${m.titulo}</h3></header><div class="w-body">
+      <div class="table-header"><span></span><div class="table-filters">
+        <input id="q-${k}" type="search" autocomplete="off" placeholder="Pesquisar..." class="form-input" style="max-width:220px">
+        <select id="f-${k}" class="form-input filter-select" style="max-width:190px"></select>
+        <button class="btn btn-sm" onclick="limparMod('${k}')">Limpar</button></div></div>
+      <div class="table-wrap"><table><thead><tr>${m.campos.filter(c=>c.c).map(c=>`<th onclick="ordenarMod('${k}','${c.k}')">${c.l}</th>`).join('')}<th onclick="ordenarMod('${k}','_vis')">Estado</th>${m.fotos?'<th>Fotos</th>':''}<th style="text-align:right">Ações</th></tr></thead><tbody id="l-${k}"></tbody></table></div>
+      <div class="pagination"><span class="page-info" id="pi-${k}"></span><div class="page-controls">
+        <button class="btn btn-sm" id="pv-${k}" onclick="pagMod('${k}',-1)">Anterior</button><button class="btn btn-sm" id="pn-${k}" onclick="pagMod('${k}',1)">Próxima</button></div></div></div></section>`;
+    fim.before(v);
+    gm('q-'+k).addEventListener('input',()=>{MS[k].pag=1;renderMod(k);});
+    gm('f-'+k).addEventListener('change',()=>{MS[k].pag=1;renderMod(k);});
+  });
+  document.body.insertAdjacentHTML('beforeend',
+   `<div class="modal-overlay" id="modalMod"><div class="modal"><div class="modal-header"><div class="modal-title" id="mmTitulo"></div></div><div class="modal-body" id="mmBody"></div>
+      <div class="modal-footer"><button class="btn" onclick="fecharMod()">Cancelar</button><button class="btn btn-primary" id="mmGuardar" onclick="guardarMod()">Guardar</button></div></div></div>
+    <div class="modal-overlay" id="modalModDet"><div class="modal"><div class="modal-header"><div class="modal-title" id="mdTitulo"></div></div><div class="modal-body" id="mdBody"></div>
+      <div class="modal-footer"><button class="btn" onclick="gm('modalModDet').classList.remove('active')">Fechar</button></div></div></div>`);
+  gm('modalMod').addEventListener('click',function(e){if(e.target===this)fecharMod();});
+  gm('modalModDet').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');});
+}
+montarMods();
+
+function escutarMods(){
+  Object.entries(MODS).forEach(([k,m])=>{ const s=MS[k]; if(s.unsub) s.unsub();
+    s.unsub=window.FB.onSnapshot(window.FB.collection(window.FB.db,m.col),snap=>{
+      s.lista=[]; snap.forEach(d=>s.lista.push({...d.data(),id:d.id}));
+      if(vistaAtual===k) renderMod(k); atualizarBadgeLemb(); badgesAlerta();
+    },e=>{ console.error(e); toast('Não foi possível sincronizar: '+m.titulo+'.','error'); });
+  });
+}
+
+function filtradosMod(k){
+  const m=MODS[k], s=MS[k], q=gm('q-'+k).value.toLowerCase().trim(), f=gm('f-'+k).value, ch=s.ord.campo;
+  const l=s.lista.filter(x=>(!f||visMod(m,x)===f)&&(!q||m.campos.some(c=>String(x[c.k]===undefined?'':x[c.k]).toLowerCase().includes(q))));
+  const val=x=>{ const v=ch==='_vis'?visMod(m,x):x[ch]; return typeof v==='number'?v:String(v===undefined||v===null?'':v).toLowerCase(); };
+  l.sort((a,b)=>{ const va=val(a), vb=val(b); return va<vb?(s.ord.dir==='asc'?-1:1):va>vb?(s.ord.dir==='asc'?1:-1):0; });
+  return l;
+}
+function ordenarMod(k,c){ const o=MS[k].ord; if(o.campo===c) o.dir=o.dir==='asc'?'desc':'asc'; else MS[k].ord={campo:c,dir:'asc'}; MS[k].pag=1; renderMod(k); }
+function pagMod(k,d){ MS[k].pag+=d; renderMod(k); }
+function limparMod(k){ gm('q-'+k).value=''; gm('f-'+k).value=''; MS[k].pag=1; renderMod(k); }
+
+function renderMod(k){
+  const m=MODS[k], s=MS[k], vl=m.visList||m.estados;
+  gm('hmTitulo').textContent=m.titulo; gm('hmSub').textContent=m.sub; gm('hmExcel').onclick=()=>exportarMod(k);
+  const cnt=e=>s.lista.filter(x=>visMod(m,x)===e).length;
+  gm('hmStats').innerHTML=[['Total',s.lista.length,'blue','']].concat(vl.map(e=>[e,cnt(e),CM[BM[e]]||'blue',e])).map(([l,v,cor,e])=>
+    `<div class="stat stat-btn c-${cor}" onclick="gm('f-${k}').value='${e}';MS['${k}'].pag=1;renderMod('${k}')"><div class="stat-label">${esc(l)}</div><div class="stat-value ${cor}">${v}</div></div>`).join('');
+  const sf=gm('f-'+k), fv=sf.value;
+  sf.innerHTML='<option value="">Todos os estados</option>'+vl.map(e=>`<option value="${esc(e)}"${e===fv?' selected':''}>${esc(e)}</option>`).join('');
+  const lista=filtradosMod(k), tp=Math.ceil(lista.length/POR_PAGINA);
+  if(s.pag>tp) s.pag=Math.max(1,tp);
+  const ini=(s.pag-1)*POR_PAGINA, pag=lista.slice(ini,ini+POR_PAGINA), cs=m.campos.filter(c=>c.c);
+  gm('l-'+k).innerHTML=pag.length?pag.map(x=>{ const i=s.lista.indexOf(x);
+    return `<tr>${cs.map(c=>`<td data-label="${esc(c.l)}">${valMod(c,x)}</td>`).join('')}<td data-label="Estado">${badgeMod(visMod(m,x))}</td>${m.fotos?`<td data-label="Fotos">${(x.fotos||[]).length||'-'}</td>`:''}
+      <td class="td-actions-cell"><div class="td-actions"><button class="btn btn-sm" onclick="verMod('${k}',${i})">Ver</button>
+      <button class="btn btn-edit btn-sm" onclick="abrirMod('${k}',${i})">Editar</button><button class="btn btn-danger btn-sm" onclick="removerMod('${k}',${i})">Remover</button></div></td></tr>`;
+  }).join(''):`<tr><td colspan="${cs.length+2+(m.fotos?1:0)}" style="padding:0"><div class="empty-state"><div class="empty-title">Sem registos</div><div class="empty-sub">Use "${esc(m.novo)}" para registar o primeiro, ou ajuste os filtros.</div></div></td></tr>`;
+  gm('pi-'+k).textContent=lista.length?`${ini+1}–${Math.min(ini+POR_PAGINA,lista.length)} de ${lista.length} registos`:'0 registos';
+  gm('pv-'+k).disabled=s.pag<=1; gm('pn-'+k).disabled=s.pag>=tp;
+}
+
+// ---------- formulário ----------
+function abrirMod(k,i){
+  if(i===undefined) i=-1;
+  if(i>=0&&!souAdmin){ toast('Apenas o administrador pode editar.','error'); return; }
+  const m=MODS[k], s=MS[k], x=i>=0?s.lista[i]:{};
+  modAtual=k; modIdx=i; s.novas=[]; s.exist=[...(x.fotos||[])];
+  gm('mmTitulo').textContent=i>=0?'Editar '+m.sing:m.novo;
+  const v=c=>x[c.k]!==undefined?x[c.k]:(c.k==='data'?hoje():c.k==='estado'?m.estados[0]:'');
+  const ctl=c=>c.t==='textarea'?`<textarea id="mf-${c.k}" class="form-input">${esc(v(c))}</textarea>`
+    :c.t==='select'?`<select id="mf-${c.k}" class="form-input">${m.estados.map(e=>`<option${e===v(c)?' selected':''}>${esc(e)}</option>`).join('')}</select>`
+    :`<input id="mf-${c.k}" type="${c.t||'text'}" ${c.t==='number'?'min="0" step="any" ':''}${c.list?`list="${c.list}" `:''}class="form-input" value="${esc(v(c))}">`;
+  const g=c=>`<div class="form-group" id="mg-${c.k}"><label class="form-label">${esc(c.l)}${c.req?' *':''}</label>${ctl(c)}<div class="form-error">Campo obrigatório</div></div>`;
+  const cs=m.campos.filter(c=>c.k!=='estado'||m.estados), si=cs.filter(c=>c.t!=='textarea'), lo=cs.filter(c=>c.t==='textarea');
+  let h=''; for(let n=0;n<si.length;n+=2) h+=`<div class="form-row">${si.slice(n,n+2).map(g).join('')}</div>`;
+  h+=lo.map(g).join('');
+  if(m.fotos) h+=`<div class="form-group"><label class="form-label">Fotos</label><div style="font-size:11px;color:var(--text-faint);margin-bottom:6px">Máximo 4 fotos (comprimidas automaticamente)</div>
+    <label class="btn btn-sm">Adicionar fotos<input type="file" accept="image/*" multiple style="display:none" onchange="fotosMod(event)"></label>
+    <div id="mmFotos" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div></div>`;
+  gm('mmBody').innerHTML=h; renderFotosMod();
+  gm('modalMod').classList.add('active');
+}
+function fecharMod(){ gm('modalMod').classList.remove('active'); }
+async function fotosMod(e){
+  const s=MS[modAtual], fs=Array.from(e.target.files||[]); e.target.value='';
+  for(const f of fs){
+    if(s.exist.length+s.novas.length>=4){ toast('Máximo de 4 fotos.','error'); break; }
+    try{
+      const d=await comprimirImagem(f), tot=s.exist.concat(s.novas).reduce((a,b)=>a+b.length,0);
+      if(tot+d.length>ORCAMENTO_BYTES_IMAGENS){ toast('Limite de tamanho atingido — remova uma foto antes de adicionar outra.','error'); break; }
+      s.novas.push(d); renderFotosMod();
+    }catch(err){ console.error(err); toast('Não foi possível processar essa foto.','error'); }
+  }
+}
+function renderFotosMod(){
+  const el=gm('mmFotos'); if(!el) return; const s=MS[modAtual];
+  el.innerHTML=s.exist.concat(s.novas).map((u,i)=>`<div style="position:relative"><img src="${u}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="ampliarFoto(this.src)"><button type="button" class="file-x" style="position:absolute;top:-6px;right:-6px;background:var(--surface);border:1px solid var(--border);border-radius:50%;padding:0 6px" onclick="tirarFotoMod(${i})" title="Remover">×</button></div>`).join('');
+}
+function tirarFotoMod(i){ const s=MS[modAtual]; if(i<s.exist.length) s.exist.splice(i,1); else s.novas.splice(i-s.exist.length,1); renderFotosMod(); }
+
+async function guardarMod(){
+  const k=modAtual, m=MODS[k], s=MS[k], d={}; let ok=true;
+  m.campos.forEach(c=>{ const el=gm('mf-'+c.k); if(!el) return;
+    d[c.k]=c.t==='number'&&el.value!==''?Number(el.value):el.value.trim();
+    const vazio=d[c.k]===''||d[c.k]===undefined; if(c.req&&vazio) ok=false;
+    gm('mg-'+c.k).classList.toggle('has-error',!!(c.req&&vazio)); });
+  if(!ok){ toast('Preencha os campos obrigatórios.','error'); return; }
+  if(!window.FB||!uidAtual){ toast('Sem ligação à nuvem — tenta novamente.','error'); return; }
+  if(modIdx>=0&&!souAdmin){ toast('Apenas o administrador pode editar.','error'); return; }
+  if(m.fotos) d.fotos=s.exist.concat(s.novas);
+  if(m.fim&&d.estado===m.fim.estado&&!d[m.fim.campo]) d[m.fim.campo]=hoje();
+  const ant=modIdx>=0?s.lista[modIdx]:null;
+  if(ant){ const df=difMod(m,ant,d); d.historico=(ant.historico||[]).concat(df.length?[entradaHist('Editado',df.join('; '))]:[]).slice(-30); }
+  else d.historico=[entradaHist('Criado','')];
+  const btn=gm('mmGuardar'); btn.disabled=true;
+  try{
+    if(modIdx>=0) await window.FB.updateDoc(window.FB.doc(window.FB.db,m.col,s.lista[modIdx].id),{...d,atualizadoEm:window.FB.serverTimestamp(),atualizadoPor:emailAtual});
+    else { const id=novoId(); await window.FB.setDoc(window.FB.doc(window.FB.db,m.col,id),{...d,id,criadoPor:uidAtual,criadoPorEmail:emailAtual,criadoEm:window.FB.serverTimestamp()}); }
+    toast('Registo guardado.','success'); fecharMod(); s.pag=1;
+  }catch(e){ console.error(e); toast('Não foi possível guardar (verifique o tamanho das fotos).','error'); }
+  finally{ btn.disabled=false; }
+}
+
+// ---------- histórico ----------
+function entradaHist(acao,det){ return {em:new Date().toISOString(),por:emailAtual||'-',acao,det}; }
+function difMod(m,a,n){
+  const f=(c,v)=>v===undefined||v===null||v===''?'-':c.t==='date'?formatarData(v):v, r=[];
+  m.campos.forEach(c=>{ if(n[c.k]===undefined) return; const va=a[c.k]===undefined?'':a[c.k], vn=n[c.k];
+    if(String(va)!==String(vn)) r.push(`${c.l}: ${f(c,va)} → ${f(c,vn)}`); });
+  if(m.fotos&&(a.fotos||[]).length!==(n.fotos||[]).length) r.push(`Fotos: ${(a.fotos||[]).length} → ${(n.fotos||[]).length}`);
+  return r;
+}
+function histHtml(x){
+  const h=(x.historico||[]).slice().reverse();
+  if(!h.length) return '<span style="color:var(--text-faint)">Sem histórico (registo anterior a esta funcionalidade)</span>';
+  return `<ul class="hist">${h.map(e=>`<li><b>${esc(e.acao)}</b>${e.det?': '+esc(e.det):''}<small>${esc(new Date(e.em).toLocaleString('pt-PT'))} · ${esc(e.por)}</small></li>`).join('')}</ul>`;
+}
+
+// ---------- alertas (indicador vermelho no menu) ----------
+function badgesAlerta(){
+  Object.keys(MODS).forEach(k=>{ const m=MODS[k]; if(!m.alerta) return;
+    const n=MS[k].lista.filter(m.alerta).length, b=gm('pill-'+k); let el=b.querySelector('.nav-alert');
+    if(!n){ if(el) el.remove(); return; }
+    if(!el){ el=document.createElement('span'); el.className='nav-alert'; b.appendChild(el); }
+    el.textContent=n; el.title=n+' com alerta';
+  });
+}
+
+// ---------- exportar para Excel ----------
+function guardarXlsx(folhas,nome){
+  if(typeof XLSX==='undefined'){ toast('A biblioteca de Excel não carregou. Verifique a ligação à internet.','error'); return; }
+  const wb=XLSX.utils.book_new();
+  folhas.forEach(([n,linhas])=>{ const ws=XLSX.utils.json_to_sheet(linhas); ws['!cols']=Object.keys(linhas[0]||{}).map(()=>({wch:22})); XLSX.utils.book_append_sheet(wb,ws,n); });
+  XLSX.writeFile(wb,`${nome}_${hoje()}.xlsx`);
+  toast('Ficheiro Excel gerado.','success');
+}
+function exportarMod(k){
+  const m=MODS[k], l=filtradosMod(k);
+  if(!l.length){ toast('Não há registos para exportar.','info'); return; }
+  const dados=l.map(x=>{ const o={};
+    m.campos.forEach(c=>{ if(c.k==='estado') return; const v=x[c.k]; o[c.l]=v===undefined||v===null?'':c.t==='date'&&v?formatarData(v):v; });
+    o['Estado']=visMod(m,x)||''; if(m.fotos) o['Fotos']=(x.fotos||[]).length; o['Registado por']=x.criadoPorEmail||''; return o; });
+  const hist=[]; l.forEach(x=>(x.historico||[]).forEach(e=>hist.push({'Registo':m.lin(x)[0],'Data':new Date(e.em).toLocaleString('pt-PT'),'Utilizador':e.por,'Ação':e.acao,'Detalhe':e.det||''})));
+  const folhas=[[m.titulo.slice(0,31),dados]]; if(hist.length) folhas.push(['Histórico',hist]);
+  guardarXlsx(folhas,m.titulo.replace(/\s+/g,'_'));
+}
+function exportarLev(){
+  const l=levFiltrados();
+  if(!l.length){ toast('Não há levantamentos para exportar.','info'); return; }
+  guardarXlsx([['Levantamentos',l.map(x=>({'Data':x.data?formatarData(x.data):'','Técnico':x.tecnico||'','Obra / cliente':x.obra||'','Levantamento':x.levantamento||'','Estado':x.estado||'','Observações':x.observacoes||'','Ficheiros':(x.ficheiros||[]).length}))]],'Levantamentos');
+}
+
+// ---------- ver / estado / remover ----------
+function verMod(k,i){
+  const m=MODS[k], x=MS[k].lista[i];
+  const linha=(r,v)=>`<div class="detail-row"><div class="detail-label">${esc(r)}</div><div class="detail-value">${v}</div></div>`;
+  const est=souAdmin&&m.estados?`<select class="form-input" style="max-width:240px" onchange="mudarEstadoMod('${k}','${x.id}',this.value)">${m.estados.map(e=>`<option${e===x.estado?' selected':''}>${esc(e)}</option>`).join('')}</select>`:badgeMod(visMod(m,x));
+  const fotos=(x.fotos||[]).map(u=>`<img src="${u}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="ampliarFoto(this.src)">`).join('');
+  gm('mdTitulo').textContent='Detalhe — '+m.sing;
+  gm('mdBody').innerHTML=linha('Estado',est)+m.campos.filter(c=>c.k!=='estado').map(c=>linha(c.l,c.t==='textarea'?`<div style="white-space:pre-wrap">${valMod(c,x)}</div>`:valMod(c,x))).join('')
+    +(m.fotos?linha('Fotos',fotos?`<div style="display:flex;gap:8px;flex-wrap:wrap">${fotos}</div>`:'-'):'')
+    +linha('Histórico',histHtml(x));
+  gm('modalModDet').classList.add('active');
+}
+async function mudarEstadoMod(k,id,estado){
+  const m=MODS[k], x=MS[k].lista.find(y=>y.id===id), up={estado,atualizadoEm:window.FB.serverTimestamp(),atualizadoPor:emailAtual};
+  if(m.fim&&estado===m.fim.estado&&x&&!x[m.fim.campo]) up[m.fim.campo]=hoje();
+  up.historico=((x&&x.historico)||[]).concat([entradaHist('Estado',(x&&x.estado||'-')+' → '+estado)]).slice(-30);
+  try{ await window.FB.updateDoc(window.FB.doc(window.FB.db,m.col,id),up); toast('Estado atualizado.','success'); }
+  catch(e){ console.error(e); toast('Não foi possível alterar o estado.','error'); }
+}
+async function removerMod(k,i){
+  if(!souAdmin){ toast('Apenas o administrador pode remover.','error'); return; }
+  const m=MODS[k], x=MS[k].lista[i]; if(!x||!confirm('Remover este registo?')) return;
+  try{ await window.FB.deleteDoc(window.FB.doc(window.FB.db,m.col,x.id)); toast('Registo removido.','info'); }
+  catch(e){ console.error(e); toast('Não foi possível remover o registo.','error'); }
+}
+
 
 // ============================================================
 // FILTROS INICIAIS
