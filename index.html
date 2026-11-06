@@ -864,6 +864,15 @@ th{background:var(--surface2);text-transform:none;letter-spacing:0;font-size:12p
   <!-- ===== VISTA: POR TÉCNICO ===== -->
   <div id="vista-tecnicos" style="display:none">
     <div class="card" style="margin-bottom:16px">
+      <div class="card-title-row"><div class="card-title">Equipa técnica <span id="equipaCount" style="color:var(--text-faint);font-weight:500"></span></div></div>
+      <div id="equipaAdmin" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <input id="eqNome" class="form-input" placeholder="Nome do técnico" style="flex:2;min-width:160px" onkeydown="if(event.key==='Enter')adicionarTecnico()">
+        <input id="eqFuncao" class="form-input" placeholder="Função (opcional)" style="flex:1;min-width:130px" onkeydown="if(event.key==='Enter')adicionarTecnico()">
+        <button class="btn btn-primary" onclick="adicionarTecnico()">Adicionar</button>
+      </div>
+      <div id="equipaLista"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
       <div class="card-title-row">
         <div class="card-title">Painel por Técnico</div>
         <div class="tabs" style="margin:0;max-width:240px">
@@ -1354,6 +1363,7 @@ window.addEventListener('fbready', async function(e){
   escutarLevantamentos();
   escutarNotas();
   escutarMods();
+  escutarEquipa();
 });
 
 window.addEventListener('pywebviewready', function(){
@@ -1464,7 +1474,7 @@ function mudarVista(vista) {
 // ============================================================
 function renderizarStats() {
   const totalHoras = tarefas.reduce((s,t)=>s+calcularHoras(t.horaInicio,t.horaFim),0);
-  const tecnicos = new Set(tarefas.map(t=>t.tecnico).filter(Boolean));
+  const tecnicos = {size:nomesTecnicos().length};
   const concluidas = tarefas.filter(t=>t.estado==='Concluido'||t.estado==='Concluído').length;
   const pendentes = tarefas.filter(t=>t.estado==='Pendente').length;
   const em_and = tarefas.filter(t=>t.estado==='Em andamento').length;
@@ -1753,9 +1763,10 @@ function tarefasNoPeriodoTecnico() {
 }
 
 function renderizarTecnicos() {
+  renderEquipa();
   const area = document.getElementById('tech-cards-area');
   const filtradas = tarefasNoPeriodoTecnico();
-  const tecList = [...new Set(tarefas.map(t=>t.tecnico).filter(Boolean))].sort();
+  const tecList = nomesTecnicos();
 
   if (tecList.length===0){
     area.innerHTML='<div class="empty-state"><div class="empty-title">Sem técnicos registados</div></div>';
@@ -1886,7 +1897,7 @@ function atualizarFiltroTecnicos() {
   sel.innerHTML = '<option value="">Todos os técnicos</option>' +
     tecns.map(t=>`<option value="${esc(t)}"${t===atual?' selected':''}>${esc(t)}</option>`).join('');
   const dl = document.getElementById('tecnicosList');
-  if(dl) dl.innerHTML = tecns.map(t=>`<option value="${esc(t)}">`).join('');
+  if(dl) dl.innerHTML = nomesTecnicos().map(t=>`<option value="${esc(t)}">`).join('');
   const cl = document.getElementById('clientesList');
   if(cl){
     const clientes = [...new Set(tarefas.map(t=>t.cliente).filter(Boolean))].sort();
@@ -2950,6 +2961,86 @@ async function guardarMod(){
     toast('Registo guardado.','success'); fecharMod(); s.pag=1;
   }catch(e){ console.error(e); toast('Não foi possível guardar (verifique o tamanho das fotos).','error'); }
   finally{ btn.disabled=false; }
+}
+
+// ---------- equipa técnica (registo de técnicos) ----------
+// Enquanto a equipa não for registada, a lista vem das tarefas (comportamento antigo).
+// Depois do primeiro registo/importação, o registo passa a ser a fonte de verdade.
+var tecRegistry=[], tecAtivo=false, tecUnsub=null;
+function nomesTecnicos(){
+  const l=tecAtivo?(tecRegistry||[]).map(t=>t.nome):tarefas.map(t=>t.tecnico);
+  return [...new Set(l.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt'));
+}
+function escutarEquipa(){
+  if(tecUnsub) tecUnsub();
+  tecUnsub=window.FB.onSnapshot(window.FB.collection(window.FB.db,'tecnicos'),snap=>{
+    tecRegistry=[]; tecAtivo=false;
+    snap.forEach(d=>{ tecAtivo=true; if(d.id!=='_config') tecRegistry.push({...d.data(),id:d.id}); });
+    atualizarFiltroTecnicos(); renderizarStats(); if(vistaAtual==='tecnicos') renderizarTecnicos();
+  },e=>{ console.error(e); toast('Não foi possível sincronizar a equipa técnica.','error'); });
+}
+function renderEquipa(){
+  const box=gm('equipaLista'); if(!box) return;
+  const deriv=[...new Set(tarefas.map(t=>(t.tecnico||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt'));
+  window._derivEquipa=deriv;
+  // antes do registo: nomes vindos das tarefas; depois: equipa registada
+  const itens=tecAtivo?(tecRegistry||[]).slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt')).map(t=>({nome:t.nome,funcao:t.funcao,acao:`removerTecnico('${t.id}')`}))
+                      :deriv.map((n,k)=>({nome:n,funcao:'',acao:`removerTecnicoIdx(${k})`}));
+  gm('equipaCount').textContent=`(${itens.length} ativo${itens.length!==1?'s':''})`;
+  gm('equipaAdmin').style.display=souAdmin?'flex':'none';
+  let h='';
+  if(!tecAtivo&&deriv.length) h+=`<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:8px">A lista vem das tarefas. ${souAdmin?'Pode remover qualquer técnico que já saiu da equipa; as tarefas dele mantêm o nome.':'Peça ao administrador para gerir a equipa.'}</div>`;
+  h+=itens.map(t=>{ const ts=tarefas.filter(x=>x.tecnico===t.nome), ab=ts.filter(x=>x.estado!=='Concluído'&&x.estado!=='Concluido').length;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><b>${esc(t.nome)}</b><div style="font-size:11.5px;color:var(--text-faint)">${esc(t.funcao||'Técnico')} · ${ts.length} tarefa${ts.length!==1?'s':''} · ${ab} em aberto</div></div>${souAdmin?`<button class="btn btn-danger btn-sm" onclick="${t.acao}">Remover</button>`:''}</div>`; }).join('');
+  if(!itens.length) h+='<div style="font-size:12.5px;color:var(--text-faint)">Equipa vazia. Adicione o primeiro técnico.</div>';
+  box.innerHTML=h;
+}
+async function removerTecnicoIdx(k){
+  if(!souAdmin){ toast('Apenas o administrador pode gerir a equipa.','error'); return; }
+  const nome=(window._derivEquipa||[])[k]; if(!nome) return;
+  const ab=tarefas.filter(x=>x.tecnico===nome&&x.estado!=='Concluído'&&x.estado!=='Concluido').length;
+  if(!confirm(`Remover "${nome}" da equipa?\n\n`+(ab?`Atenção: tem ${ab} tarefa${ab!==1?'s':''} em aberto.\n`:'')+'As tarefas e registos já existentes mantêm o nome.')) return;
+  try{ if(await importarEquipa(true,nome)) toast('Técnico removido da equipa.','info'); }
+  catch(e){ console.error(e); toast('Não foi possível remover o técnico.','error'); }
+}
+async function garantirEquipa(){
+  if(tecAtivo) return;
+  await window.FB.setDoc(window.FB.doc(window.FB.db,'tecnicos','_config'),{ativo:true,criadoEm:window.FB.serverTimestamp()});
+  tecAtivo=true;
+}
+async function importarEquipa(quieto,excluir){
+  if(!souAdmin){ toast('Apenas o administrador pode gerir a equipa.','error'); return; }
+  const ja=new Set((tecRegistry||[]).map(t=>t.nome.toLowerCase()));
+  const novos=[...new Set(tarefas.map(t=>(t.tecnico||'').trim().replace(/\s+/g,' ')).filter(Boolean))].filter(n=>!ja.has(n.toLowerCase())&&n.toLowerCase()!==(excluir||'').toLowerCase());
+  try{
+    await garantirEquipa();
+    for(const nome of novos){ const id=novoId(); await window.FB.setDoc(window.FB.doc(window.FB.db,'tecnicos',id),{id,nome,funcao:'',criadoEm:window.FB.serverTimestamp(),criadoPor:emailAtual}); }
+    if(!quieto) toast(`${novos.length} técnico${novos.length!==1?'s':''} importado${novos.length!==1?'s':''}.`,'success');
+    return true;
+  }catch(e){ console.error(e); toast('Não foi possível atualizar a equipa.','error'); return false; }
+}
+async function adicionarTecnico(){
+  if(!souAdmin){ toast('Apenas o administrador pode gerir a equipa.','error'); return; }
+  const n=gm('eqNome').value.trim().replace(/\s+/g,' '), f=gm('eqFuncao').value.trim();
+  if(!n){ toast('Indique o nome do técnico.','error'); return; }
+  if((tecRegistry||[]).some(t=>t.nome.toLowerCase()===n.toLowerCase())){ toast('Esse técnico já existe na equipa.','error'); return; }
+  try{
+    if(!tecAtivo&&tarefas.some(t=>t.tecnico)){
+      if(confirm('A equipa ainda não foi registada. Importar também os técnicos que já aparecem nas tarefas?')) await importarEquipa(true); else await garantirEquipa();
+    } else await garantirEquipa();
+    if(!(tecRegistry||[]).concat([]).some(t=>t.nome.toLowerCase()===n.toLowerCase())){
+      const id=novoId(); await window.FB.setDoc(window.FB.doc(window.FB.db,'tecnicos',id),{id,nome:n,funcao:f,criadoEm:window.FB.serverTimestamp(),criadoPor:emailAtual});
+    }
+    gm('eqNome').value=''; gm('eqFuncao').value=''; toast('Técnico adicionado.','success');
+  }catch(e){ console.error(e); toast('Não foi possível adicionar o técnico.','error'); }
+}
+async function removerTecnico(id){
+  if(!souAdmin){ toast('Apenas o administrador pode gerir a equipa.','error'); return; }
+  const t=(tecRegistry||[]).find(x=>x.id===id); if(!t) return;
+  const ab=tarefas.filter(x=>x.tecnico===t.nome&&x.estado!=='Concluído'&&x.estado!=='Concluido').length;
+  if(!confirm(`Remover "${t.nome}" da equipa?\n\n`+(ab?`Atenção: tem ${ab} tarefa${ab!==1?'s':''} em aberto.\n`:'')+'As tarefas e registos já existentes mantêm o nome.')) return;
+  try{ await window.FB.deleteDoc(window.FB.doc(window.FB.db,'tecnicos',id)); toast('Técnico removido da equipa.','info'); }
+  catch(e){ console.error(e); toast('Não foi possível remover o técnico.','error'); }
 }
 
 // ---------- histórico ----------
